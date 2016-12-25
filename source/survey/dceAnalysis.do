@@ -454,7 +454,63 @@ postfoot("\bottomrule           "
          "ratio, with confidence levels based on Leamer values. "
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
+estimates clear
+
+*-------------------------------------------------------------------------------
+*--- (6) Full WTP and marginal WTP
+*-------------------------------------------------------------------------------
+local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
+eststo: logit chosen `bwts' costNumerical `ctrl' if mainSample==1, cluster(ID)
+margins, dydx(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) post
+
+gen bwtWTP = 0 in 1
+gen bwtUB  = 0 in 1
+gen bwtLB  = 0 in 1
+foreach num of numlist 2(1)11 {
+    est restore est1
+    replace bwtWTP = -1000*(_b[_bwt`num']/_b[costNumerical]) in `num'
+    nlcom ratio:_b[_bwt`num']/_b[costNumerical], post
+    replace bwtUB = -1000*(_b[ratio]+1.96*_se[ratio]) in `num'
+    replace bwtLB = -1000*(_b[ratio]-1.96*_se[ratio]) in `num'
+}
+
+gen nums = _n
+#delimit ;
+twoway line bwtWTP nums in 1/11, lcolor(black)   ||
+    scatter bwtWTP nums in 1/11, msymbol(O)  ||
+    rcap bwtLB bwtUB nums in 1/11, scheme(s1mono) 
+ytitle("Willingness to Pay (Dollars)") xtitle("Birthweight (grams)") 
+xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
+       8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
+legend(order(2 "Willingness to Pay" 3 "95% CI"));
+#delimit cr
+graph export "$OUT/Figures/WTP_relative.eps", replace
 
 
-
-
+gen _bwt1=birthweight=="5 pounds 8 ounces"
+gen m_bwtWTP = 0 in 1
+gen m_bwtUB  = 0 in 1
+gen m_bwtLB  = 0 in 1
+foreach num of numlist 2(1)11 {
+    local n1 = `num'-1
+    preserve
+    drop _bwt`n1'
+    eststo: logit chosen _bwt* costNumerical `ctrl' if mainSample==1, cluster(ID)
+    margins, dydx(costNumerical _bwt`num') post
+    restore
+    
+    replace m_bwtWTP = -1000*(_b[_bwt`num']/_b[costNumerical]) in `num'
+    nlcom ratio:_b[_bwt`num']/_b[costNumerical], post
+    replace m_bwtUB = -1000*(_b[ratio]+1.96*_se[ratio]) in `num'
+    replace m_bwtLB = -1000*(_b[ratio]-1.96*_se[ratio]) in `num'
+}
+#delimit ;
+twoway line m_bwtWTP nums in 1/11, lcolor(black)   ||
+    scatter m_bwtWTP nums in 1/11, msymbol(O)  ||
+    rcap m_bwtLB m_bwtUB nums in 1/11, scheme(s1mono) 
+ytitle("Marginal Willingness to Pay (Dollars)") xtitle("Birthweight (grams)") 
+xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
+       8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
+legend(order(2 "Marginal Willingness to Pay" 3 "95% CI"));
+#delimit cr
+graph export "$OUT/Figures/WTP_marginal.eps", replace
