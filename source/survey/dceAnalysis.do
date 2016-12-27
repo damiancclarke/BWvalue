@@ -456,6 +456,79 @@ postfoot("\bottomrule           "
 #delimit cr
 estimates clear
 
+gen All = 1
+local m = 1
+foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+    local vars bwtGrams costNumerical `ctrl' 
+    eststo: logit chosen `vars' if mainSample==1&`c', cluster(ID)
+    margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4 _gend2) post
+    est store m`m'
+
+    estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+    nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+    local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+    local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+    estadd local conf95a "[`ub';`lb']": m`m'
+    local ++m
+}
+#delimit ;
+esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGroups.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birthweight (1000 grams)"
+                                            "95\% CI" Observations))
+starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+mgroups("All" "Parent" "Gender", pattern(1 1 0 1 0)
+        prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
+mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
+title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgreg}) 
+keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
+postfoot("\bottomrule           "
+         "\multicolumn{6}{p{18.2cm}}{\begin{footnotesize} Average marginal   "
+         "effects from a logit regression are displayed. All columns include "
+         "option order fixed effects and round fixed effects. Standard       "
+         "errors are clustered by respondent. Willingness to pay and its     "
+         "95\% confidence interval is estimated based on the ratio of costs  "
+         "to the probability of choosing a particular birthweight. The 95\%  "
+         "confidence interval is calculated using the delta method for the   "
+         "ratio, with confidence levels based on Leamer values. "
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+
+
+local m = 1
+foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+    local vars costNumerical `bwts' `ctrl' 
+    eststo: logit chosen `vars' if mainSample==1&`c', cluster(ID)
+    margins, dydx(`bwts' costNumerical _sob2 _sob3 _sob4 _gend2) post
+    est store m`m'
+
+    local ++m
+}
+#delimit ;
+esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGroups-wts.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(N, fmt(%9.0g) label(Observations))
+starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+mgroups("All" "Parent" "Gender", pattern(1 1 0 1 0)
+        prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
+mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
+title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgregc}) 
+keep(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) style(tex) 
+postfoot("\bottomrule           "
+         "\multicolumn{6}{p{15.2cm}}{\begin{footnotesize} Average marginal   "
+         "effects from a logit regression are displayed. All columns include "
+         "option order fixed effects and round fixed effects. Standard       "
+         "errors are clustered by respondent. Willingness to pay and its     "
+         "95\% confidence interval is estimated based on the ratio of costs  "
+         "to the probability of choosing a particular birthweight. The 95\%  "
+         "confidence interval is calculated using the delta method for the   "
+         "ratio, with confidence levels based on Leamer values. "
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+
+exit
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
 *-------------------------------------------------------------------------------
