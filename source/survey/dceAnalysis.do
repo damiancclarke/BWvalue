@@ -528,7 +528,7 @@ postfoot("\bottomrule           "
 #delimit cr
 estimates clear
 
-exit
+
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
 *-------------------------------------------------------------------------------
@@ -587,3 +587,74 @@ xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
 legend(order(2 "Marginal Willingness to Pay" 3 "95% CI"));
 #delimit cr
 graph export "$OUT/Figures/WTP_marginal.eps", replace
+
+
+*-------------------------------------------------------------------------------
+*--- (7) Assumptions
+*-------------------------------------------------------------------------------
+gen bw_place1 = ff1=="Birth Weight"
+gen bw_place2 = ff2=="Birth Weight"
+gen bw_place3 = ff3=="Birth Weight"
+gen bw_place4 = ff4=="Birth Weight"
+
+gen _asmEst = .
+gen _asmUB  = .
+gen _asmLB  = .
+gen _asmOrd = .
+
+reg chosen bwtGrams, cluster(ID)
+replace _asmEst = _b[bwtGrams] in 5
+replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in 5
+replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in 5
+replace _asmOrd = 5 in 5
+
+local oo = 4
+foreach num of numlist 1(1)4 {
+    reg chosen bwtGrams if bw_place`num'==1, cluster(ID)
+    replace _asmEst = _b[bwtGrams] in `num'
+    replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in `num'
+    replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in `num'
+    replace _asmOrd = `oo' in `num'
+    local --oo
+}
+sort _asmOrd
+
+#delimit ;
+twoway  scatter _asmOrd _asmEst, ylabel(1 "4" 2 "3" 3 "2" 4 "1" 5 "Pooled", angle(0))
+|| rcap _asmUB _asmLB _asmOrd, xline(0, lcolor(blue) lpattern(dash))
+legend(lab(1 "Point Estimate") lab(2 "95\% CI")) scheme(s1mono) horizontal
+ytitle("Row Position of Birth Weight Attribute") xtitle("{&Delta} Pr Chooses Birth");
+graph export "$OUT/Figures/attributeOrder.eps", replace;
+#delimit cr
+
+foreach var of varlist _asm* {
+    replace `var' = .
+}
+
+reg chosen bwtGrams, cluster(ID)
+replace _asmEst = _b[bwtGrams] in 8
+replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in 8
+replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in 8
+replace _asmOrd  = 8 in 8
+
+local oo = 7
+foreach num of numlist 1(1)7 {
+    reg chosen bwtGrams if round==`num', cluster(ID)
+    replace _asmEst = _b[bwtGrams] in `num'
+    replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in `num'
+    replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in `num'
+    replace _asmOrd = `oo' in `num'
+    local --oo
+}
+sort _asmOrd
+
+#delimit ;
+twoway  scatter _asmOrd _asmEst, xline(0, lcolor(blue) lpattern(dash)) ||
+    rcap _asmUB _asmLB _asmOrd, scheme(s1mono) horizontal
+ylabel(1 "7" 2 "6" 3 "5" 4 "4" 5 "3" 6 "2" 7 "1" 8 "Pooled", angle(0))
+ytitle("Round Number of Experiment") xtitle("{&Delta} Pr Chooses Birth")
+legend(lab(1 "Point Estimate") lab(2 "95\% CI"));
+graph export "$OUT/Figures/roundOrder.eps", replace;
+#delimit cr
+
+    
