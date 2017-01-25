@@ -136,8 +136,31 @@ count
 bys statename: gen stateProportion = _N/r(N)
 
 preserve
+insheet using "$GEO/population2015.csv", delim(";") names clear
+replace state=subinstr(state,".","",1)
+rename state NAME
+tempfile pop
+save `pop'
+restore
+
+preserve
 collapse stateProportion, by(statename)
 rename statename NAME
+merge 1:1 NAME using `pop'
+replace stateProportion = 0 if stateProportion == .
+replace stateProportion = stateProportion*100
+replace proportion = proportion*100
+format stateProportion %5.2f
+format proportion %5.2f
+gen diff = stateProportion - proportion
+format diff %5.2f
+#delimit ;
+listtex NAME stateProp prop diff using "$OUT/Summary/GeographicCoverage.tex",
+rstyle(tabular) replace;
+#delimit cr
+replace stateProportion = stateProportion/100
+replace proportion = proportion/100
+drop _merge
 
 merge 1:1 NAME using "$GEO/US_db"
 format stateProportion %5.2f
@@ -483,7 +506,7 @@ mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
-         "\multicolumn{6}{p{18.2cm}}{\begin{footnotesize} Average marginal   "
+         "\multicolumn{6}{p{19.2cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
          "option order fixed effects and round fixed effects. Standard       "
          "errors are clustered by respondent. Willingness to pay and its     "
@@ -528,10 +551,100 @@ postfoot("\bottomrule           "
 #delimit cr
 estimates clear
 
+local ctrl `oFEs' _sob*
+local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
+local g1 mainSample==1&_gend2==1
+local g2 mainSample==1&_gend2==0
+
+eststo: logit chosen bwtGrams costNumerical `ctrl' if `g1', cluster(ID)
+margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4) post
+est store m1
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95 "[`ub';`lb']": m1
+
+eststo: logit chosen `bwts' costNumerical `ctrl' if `g1', cluster(ID)
+margins, dydx(costNumerical `bwts' _sob2 _sob3 _sob4) post
+est store m2
+
+eststo: logit chosen bwtGrams costNumerical `ctrl' if `g2', cluster(ID)
+margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4) post
+est store m3
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95 "[`ub';`lb']": m3
+
+eststo: logit chosen `bwts' costNumerical `ctrl' if `g2', cluster(ID)
+margins, dydx(costNumerical `bwts' _sob2 _sob3 _sob4) post
+est store m4
+
+gen girlBW = _gend2*bwtGrams
+lab var girlBW "Birthweight $\times$ Girl"
+local int bwtGrams _gend2 girlBW
+
+eststo: logit chosen `int' costNumerical `ctrl' if mainSample==1, cluster(ID)
+margins, dydx(bwtGrams _gend2 girlBW costNumerical _sob2 _sob3 _sob4) post
+est store m5
+
+
+#delimit ;
+esttab m1 m2 m3 m4 using "$OUT/Regressions/conjoint-gendInd.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birthweight (1000 grams)"
+                                            "95\% CI" Observations))
+starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+mgroups("Girl Experiment" "Boy Experiment", pattern(1 0 1 0)
+        prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
+booktabs label
+title("Gender of Index Child and Willingness to Pay for Birthweight"\label{WTPgend}) 
+keep(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4) style(tex) 
+postfoot("\bottomrule           "
+         "\multicolumn{5}{p{15.2cm}}{\begin{footnotesize} Estimates are      "
+         "separated by the gender of the child shown in each profile (girl   "
+         "or boy). Average marginal effects from a logit regression are      "
+         "displayed. All columns include "
+         "option order fixed effects and round fixed effects. Standard       "
+         "errors are clustered by respondent. Willingness to pay and its     "
+         "95\% confidence interval is estimated based on the ratio of costs  "
+         "to the probability of choosing a particular birthweight. The 95\%  "
+         "confidence interval is calculated using the delta method for the   "
+         "ratio, with confidence levels based on Leamer values. "
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+
+*-------------------------------------------------------------------------------
+*--- (5b) Block bootstrap robustness test
+*-------------------------------------------------------------------------------
+local ctrl `oFEs' _gend* _sob*
+
+foreach c in mainSample==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+    count if `c'
+    #delimit ;
+    bootstrap ratio=(_b[bwtGrams]/_b[costNumerical]),
+    reps(1000) seed(1201) cluster(ID) idcluster(bID):
+    logit chosen bwtGrams costNumerical `ctrl' if `c', cluster(bID);
+    #delimit cr
+}
+#delimit ;
+bootstrap ratio=(_b[bwtGrams]/_b[costNumerical]),
+reps(1000) seed(1201) cluster(ID) idcluster(bID):
+logit chosen bwtGrams costNumerical `oFEs' _sob* if _gend2==1, cluster(bID);
+
+bootstrap ratio=(_b[bwtGrams]/_b[costNumerical]),
+reps(1000) seed(1201) cluster(ID) idcluster(bID):
+logit chosen bwtGrams costNumerical `oFEs' _sob* if _gend2==0, cluster(bID);
+#delimit cr
+exit
 
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
 *-------------------------------------------------------------------------------
+local ctrl `oFEs' _gend* _sob*
 local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
 eststo: logit chosen `bwts' costNumerical `ctrl' if mainSample==1, cluster(ID)
 margins, dydx(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) post
@@ -559,7 +672,50 @@ legend(order(2 "Willingness to Pay" 3 "95% CI"));
 #delimit cr
 graph export "$OUT/Figures/WTP_relative.eps", replace
 
+**GIRLS AND BOYS
+local ctrl `oFEs' _sob*
+eststo: logit chosen `bwts' costNumerical `ctrl' if `g1', cluster(ID)
+margins, dydx(costNumerical `bwts' _sob2 _sob3 _sob4) post
 
+gen gbwtWTP = 0 in 1
+gen gbwtUB  = 0 in 1
+gen gbwtLB  = 0 in 1
+foreach num of numlist 2(1)11 {
+    est restore est2
+    replace gbwtWTP = -1000*(_b[_bwt`num']/_b[costNumerical]) in `num'
+    nlcom ratio:_b[_bwt`num']/_b[costNumerical], post
+    replace gbwtUB = -1000*(_b[ratio]+1.96*_se[ratio]) in `num'
+    replace gbwtLB = -1000*(_b[ratio]-1.96*_se[ratio]) in `num'
+}
+eststo: logit chosen `bwts' costNumerical `ctrl' if `g2', cluster(ID)
+margins, dydx(costNumerical `bwts' _sob2 _sob3 _sob4) post
+
+gen bbwtWTP = 0 in 1
+gen bbwtUB  = 0 in 1
+gen bbwtLB  = 0 in 1
+foreach num of numlist 2(1)11 {
+    est restore est3
+    replace bbwtWTP = -1000*(_b[_bwt`num']/_b[costNumerical]) in `num'
+    nlcom ratio:_b[_bwt`num']/_b[costNumerical], post
+    replace bbwtUB = -1000*(_b[ratio]+1.96*_se[ratio]) in `num'
+    replace bbwtLB = -1000*(_b[ratio]-1.96*_se[ratio]) in `num'
+}
+
+#delimit ;
+twoway line gbwtWTP nums in 1/11, lcolor(blue) lwidth(thick)   ||
+       line bbwtWTP nums in 1/11, lcolor(red) lwidth(thick) lpattern(dash) ||
+       rcap gbwtLB gbwtUB nums in 1/11, ||
+       rcap bbwtLB bbwtUB nums in 1/11, scheme(s1mono) 
+ytitle("Willingness to Pay (Dollars)") xtitle("Birthweight (grams)") 
+xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
+       8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
+legend(order(1 "Girl Child" 2 "Boy Child" 3 "95% CI"));
+#delimit cr
+graph export "$OUT/Figures/WTP_relative_gends.eps", replace
+exit
+
+
+local ctrl `oFEs' _gend* _sob*
 gen _bwt1=birthweight=="5 pounds 8 ounces"
 gen m_bwtWTP = 0 in 1
 gen m_bwtUB  = 0 in 1
@@ -602,7 +758,8 @@ gen _asmUB  = .
 gen _asmLB  = .
 gen _asmOrd = .
 
-reg chosen bwtGrams, cluster(ID)
+local c1 `oFEs' _gend* _sob* _cost*
+reg chosen bwtGrams `c1' if mainSample==1, cluster(ID)
 replace _asmEst = _b[bwtGrams] in 5
 replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in 5
 replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in 5
@@ -610,7 +767,7 @@ replace _asmOrd = 5 in 5
 
 local oo = 4
 foreach num of numlist 1(1)4 {
-    reg chosen bwtGrams if bw_place`num'==1, cluster(ID)
+    reg chosen bwtGrams `c1' if bw_place`num'==1&mainSample==1, cluster(ID)
     replace _asmEst = _b[bwtGrams] in `num'
     replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in `num'
     replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in `num'
@@ -631,7 +788,8 @@ foreach var of varlist _asm* {
     replace `var' = .
 }
 
-reg chosen bwtGrams, cluster(ID)
+local c1 bw_place* _gend* _sob* _cost*
+reg chosen bwtGrams `c1' if mainSample==1, cluster(ID)
 replace _asmEst = _b[bwtGrams] in 8
 replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in 8
 replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in 8
@@ -639,7 +797,7 @@ replace _asmOrd  = 8 in 8
 
 local oo = 7
 foreach num of numlist 1(1)7 {
-    reg chosen bwtGrams if round==`num', cluster(ID)
+    reg chosen bwtGrams `c1' if round==`num'&mainSample==1, cluster(ID)
     replace _asmEst = _b[bwtGrams] in `num'
     replace _asmUB  = _b[bwtGrams]+1.96*_se[bwtGrams] in `num'
     replace _asmLB  = _b[bwtGrams]-1.96*_se[bwtGrams] in `num'
