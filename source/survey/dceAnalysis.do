@@ -474,7 +474,7 @@ postfoot("\bottomrule           "
          "95\% confidence interval is estimated based on the ratio of costs  "
          "to the probability of choosing a particular birthweight. The 95\%  "
          "confidence interval is calculated using the delta method for the   "
-         "ratio, with confidence levels based on Leamer values. "
+         "ratio. "
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
@@ -506,14 +506,15 @@ mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
-         "\multicolumn{6}{p{19.2cm}}{\begin{footnotesize} Average marginal   "
+         "\multicolumn{6}{p{19.5cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
          "option order fixed effects and round fixed effects. Standard       "
          "errors are clustered by respondent. Willingness to pay and its     "
          "95\% confidence interval is estimated based on the ratio of costs  "
-         "to the probability of choosing a particular birthweight. The 95\%  "
+         "to the probability of choosing a particular birth weight. The 95\% "
          "confidence interval is calculated using the delta method for the   "
-         "ratio, with confidence levels based on Leamer values. "
+         "ratio. Identical regressions with a continuous measure of          "
+         "birth weight are provided in table \ref{WTPgregc}.                 "
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
@@ -539,14 +540,17 @@ mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgregc}) 
 keep(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
-         "\multicolumn{6}{p{15.2cm}}{\begin{footnotesize} Average marginal   "
+         "\multicolumn{6}{p{15.0cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
          "option order fixed effects and round fixed effects. Standard       "
          "errors are clustered by respondent. Willingness to pay and its     "
          "95\% confidence interval is estimated based on the ratio of costs  "
          "to the probability of choosing a particular birthweight. The 95\%  "
          "confidence interval is calculated using the delta method for the   "
-         "ratio, with confidence levels based on Leamer values. "
+         "ratio.  No WTP figures are displayed in the table footer as each   "
+         "birth weight category is associated with its own WTP. These values "
+         "are all displayed in figure \ref{WTP-marginal}, or are displayed   "
+         "for the linear specification in table \ref{WTPgreg}."
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
@@ -603,7 +607,7 @@ booktabs label
 title("Gender of Index Child and Willingness to Pay for Birthweight"\label{WTPgend}) 
 keep(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
-         "\multicolumn{5}{p{15.2cm}}{\begin{footnotesize} Estimates are      "
+         "\multicolumn{5}{p{15.4cm}}{\begin{footnotesize} Estimates are      "
          "separated by the gender of the child shown in each profile (girl   "
          "or boy). Average marginal effects from a logit regression are      "
          "displayed. All columns include "
@@ -612,7 +616,10 @@ postfoot("\bottomrule           "
          "95\% confidence interval is estimated based on the ratio of costs  "
          "to the probability of choosing a particular birthweight. The 95\%  "
          "confidence interval is calculated using the delta method for the   "
-         "ratio, with confidence levels based on Leamer values. "
+         "ratio. WTP estimates are only displayed in columns 1 and 3, as     "
+         "columns 2 and 4 result in a single WTP for each categorical birth  "
+         "weight measure.  Individual WTP values for boys and girls in the   "
+         "categorical weights are available in figure \ref{graphGend}."
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
@@ -621,25 +628,34 @@ estimates clear
 *--- (5b) Block bootstrap robustness test
 *-------------------------------------------------------------------------------
 local ctrl `oFEs' _gend* _sob*
-
-foreach c in mainSample==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
-    count if `c'
+local nboot 1000
+    
+foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+    preserve
+    keep if `c'&mainSample==1
     #delimit ;
     bootstrap ratio=(_b[bwtGrams]/_b[costNumerical]),
-    reps(1000) seed(1201) cluster(ID) idcluster(bID):
-    logit chosen bwtGrams costNumerical `ctrl' if `c', cluster(bID);
+    reps(`nboot') seed(1201) cluster(ID) idcluster(bID):
+    logit chosen bwtGrams costNumerical `ctrl', cluster(bID);
     #delimit cr
+    restore
 }
+preserve
+keep if _gend2==1&mainSample==1
 #delimit ;
 bootstrap ratio=(_b[bwtGrams]/_b[costNumerical]),
-reps(1000) seed(1201) cluster(ID) idcluster(bID):
-logit chosen bwtGrams costNumerical `oFEs' _sob* if _gend2==1, cluster(bID);
+reps(`nboot') seed(1201) cluster(ID) idcluster(bID):
+logit chosen bwtGrams costNumerical `oFEs' _sob*, cluster(bID);
+restore;
 
+preserve;
+keep if _gend2==0&mainSample==1;
 bootstrap ratio=(_b[bwtGrams]/_b[costNumerical]),
-reps(1000) seed(1201) cluster(ID) idcluster(bID):
-logit chosen bwtGrams costNumerical `oFEs' _sob* if _gend2==0, cluster(bID);
+reps(`nboot') seed(1201) cluster(ID) idcluster(bID):
+logit chosen bwtGrams costNumerical `oFEs' _sob*, cluster(bID);
 #delimit cr
-exit
+restore
+x
 
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
@@ -712,7 +728,7 @@ xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
 legend(order(1 "Girl Child" 2 "Boy Child" 3 "95% CI"));
 #delimit cr
 graph export "$OUT/Figures/WTP_relative_gends.eps", replace
-exit
+
 
 
 local ctrl `oFEs' _gend* _sob*
