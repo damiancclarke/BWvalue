@@ -455,16 +455,16 @@ lab var _sob4 "Fall"
 lab var _sob2 "Spring"
 lab var _sob3 "Summer"
 lab var costNumerical "Cost (in 1000s of dollars)"
-lab var bwtGrams      "Birthweight (in 1000s of grams)"
+lab var bwtGrams      "Birth Weight (in 1000s of grams)"
 
 #delimit ;
 esttab m1 m2 using "$OUT/Regressions/conjointWTP.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
-(wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birthweight (1000 grams)" "95\% CI"
+(wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)" "95\% CI"
                                             Observations))
 starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
 mlabels("Continuous" "Categorical") booktabs label
-title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPreg}) 
+title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4 `bwts') style(tex) 
 postfoot("\bottomrule           "
          "\multicolumn{3}{p{11.2cm}}{\begin{footnotesize} Average marginal   "
@@ -472,7 +472,7 @@ postfoot("\bottomrule           "
          "option order fixed effects and round fixed effects. Standard       "
          "errors are clustered by respondent. Willingness to pay and its     "
          "95\% confidence interval is estimated based on the ratio of costs  "
-         "to the probability of choosing a particular birthweight. The 95\%  "
+         "to the probability of choosing a particular birth weight. The 95\%  "
          "confidence interval is calculated using the delta method for the   "
          "ratio. "
          "\end{footnotesize}}\end{tabular}\end{table}");
@@ -497,13 +497,13 @@ foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" 
 #delimit ;
 esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGroups.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
-(wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birthweight (1000 grams)"
+(wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
                                             "95\% CI" Observations))
 starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
 mgroups("All" "Parent" "Gender", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
-title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgreg}) 
+title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPgreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
          "\multicolumn{6}{p{19.5cm}}{\begin{footnotesize} Average marginal   "
@@ -537,7 +537,7 @@ starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
 mgroups("All" "Parent" "Gender", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
-title("Birth Characteristics and Willingness to Pay for Birthweight"\label{WTPgregc}) 
+title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPgregc}) 
 keep(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
          "\multicolumn{6}{p{15.0cm}}{\begin{footnotesize} Average marginal   "
@@ -545,7 +545,7 @@ postfoot("\bottomrule           "
          "option order fixed effects and round fixed effects. Standard       "
          "errors are clustered by respondent. Willingness to pay and its     "
          "95\% confidence interval is estimated based on the ratio of costs  "
-         "to the probability of choosing a particular birthweight. The 95\%  "
+         "to the probability of choosing a particular birth weight. The 95\%  "
          "confidence interval is calculated using the delta method for the   "
          "ratio.  No WTP figures are displayed in the table footer as each   "
          "birth weight category is associated with its own WTP. These values "
@@ -587,7 +587,7 @@ margins, dydx(costNumerical `bwts' _sob2 _sob3 _sob4) post
 est store m4
 
 gen girlBW = _gend2*bwtGrams
-lab var girlBW "Birthweight $\times$ Girl"
+lab var girlBW "Birth Weight $\times$ Girl"
 local int bwtGrams _gend2 girlBW
 
 eststo: logit chosen `int' costNumerical `ctrl' if mainSample==1, cluster(ID)
@@ -598,13 +598,13 @@ est store m5
 #delimit ;
 esttab m1 m2 m3 m4 using "$OUT/Regressions/conjoint-gendInd.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
-(wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birthweight (1000 grams)"
+(wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
                                             "95\% CI" Observations))
 starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
 mgroups("Girl Experiment" "Boy Experiment", pattern(1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 booktabs label
-title("Gender of Index Child and Willingness to Pay for Birthweight"\label{WTPgend}) 
+title("Gender of Index Child and Willingness to Pay for Birth Weight"\label{WTPgend}) 
 keep(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
          "\multicolumn{5}{p{15.4cm}}{\begin{footnotesize} Estimates are      "
@@ -614,7 +614,7 @@ postfoot("\bottomrule           "
          "option order fixed effects and round fixed effects. Standard       "
          "errors are clustered by respondent. Willingness to pay and its     "
          "95\% confidence interval is estimated based on the ratio of costs  "
-         "to the probability of choosing a particular birthweight. The 95\%  "
+         "to the probability of choosing a particular birth weight. The 95\%  "
          "confidence interval is calculated using the delta method for the   "
          "ratio. WTP estimates are only displayed in columns 1 and 3, as     "
          "columns 2 and 4 result in a single WTP for each categorical birth  "
@@ -655,7 +655,7 @@ reps(`nboot') seed(1201) cluster(ID) idcluster(bID):
 logit chosen bwtGrams costNumerical `oFEs' _sob*, cluster(bID);
 #delimit cr
 restore
-x
+
 
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
@@ -681,7 +681,7 @@ gen nums = _n
 twoway line bwtWTP nums in 1/11, lcolor(black)   ||
     scatter bwtWTP nums in 1/11, msymbol(O)  ||
     rcap bwtLB bwtUB nums in 1/11, scheme(s1mono) 
-ytitle("Willingness to Pay (Dollars)") xtitle("Birthweight (grams)") 
+ytitle("Willingness to Pay (Dollars)") xtitle("Birth Weight (grams)") 
 xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
        8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
 legend(order(2 "Willingness to Pay" 3 "95% CI"));
@@ -722,7 +722,7 @@ twoway line gbwtWTP nums in 1/11, lcolor(blue) lwidth(thick)   ||
        line bbwtWTP nums in 1/11, lcolor(red) lwidth(thick) lpattern(dash) ||
        rcap gbwtLB gbwtUB nums in 1/11, ||
        rcap bbwtLB bbwtUB nums in 1/11, scheme(s1mono) 
-ytitle("Willingness to Pay (Dollars)") xtitle("Birthweight (grams)") 
+ytitle("Willingness to Pay (Dollars)") xtitle("Birth Weight (grams)") 
 xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
        8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
 legend(order(1 "Girl Child" 2 "Boy Child" 3 "95% CI"));
@@ -753,7 +753,7 @@ foreach num of numlist 2(1)11 {
 twoway line m_bwtWTP nums in 1/11, lcolor(black)   ||
     scatter m_bwtWTP nums in 1/11, msymbol(O)  ||
     rcap m_bwtLB m_bwtUB nums in 1/11, scheme(s1mono) 
-ytitle("Marginal Willingness to Pay (Dollars)") xtitle("Birthweight (grams)") 
+ytitle("Marginal Willingness to Pay (Dollars)") xtitle("Birth Weight (grams)") 
 xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
        8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
 legend(order(2 "Marginal Willingness to Pay" 3 "95% CI"));
