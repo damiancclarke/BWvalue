@@ -1,0 +1,1350 @@
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{appendix}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\epstopdfsetup{update}
+\usepackage{helvet}
+\usepackage{hyperref}
+\usepackage{indentfirst}
+\usepackage{lscape}
+\usepackage{longtable}
+\usepackage{pdflscape}
+\usepackage{morefloats}
+\usepackage{natbib}
+\bibliographystyle{aea}
+%\bibliographystyle{abbrvnat}\bibpunct{(}{)}{;}{a}{,}{,}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage[capposition=top]{floatrow}
+\usepackage{subfloat}
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usepackage{eurosym}
+%\usepackage[pdf]{pstricks}
+
+\usetikzlibrary{trees}
+\usetikzlibrary{decorations.markings}
+
+
+%MARGINS
+ \topmargin   =  0.0in
+ \headheight  =  -0.3in
+ \headsep     =  0.7in
+ \oddsidemargin= 0.0in
+ \evensidemargin=0.0in
+ \textheight  =  9.0in
+ \textwidth   =  6.2in
+% \setlength{\parindent}{4em}
+ \setlength{\parskip}{1em}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=BlueViolet,
+    citecolor=BlueViolet,
+    filecolor=BlueViolet,
+    urlcolor=BlueViolet
+}
+
+\title{On the Value of Birth Weight}
+\author{\small{Damian Clarke} \\ \small{Universidad de Santiago de Chile} \and \small{Sonia Oreffice} \\ \small{University of Surrey \& IZA}  \and \small{Climent Quintana-Domeque} \\ \small{University of Oxford \& IZA}}
+
+\date{\today}
+\begin{document}
+\begin{spacing}{1.4}
+\maketitle
+
+\begin{abstract}
+  Significant work exists documenting the educational and labour market returns
+  to birth weight.  This is reflected in investments in a range of public
+  programs targeting birth weight and early life health measures.  However,
+  there is scarce evidence on the parental (private) valuation of birth
+  weight.  In this paper we document that there exists a significant and non-linear
+  willingness to pay for birth weight even in the ``normal'' range of
+  2,500 to 4,000 grams.  Using a series of discrete choice experiments conducted
+  on Amazon's Mechcanical Turk platform, we
+  estimate that parents are, on average, willing to pay \$1.72 for each
+  additional gram of their babies' birth weight over the normal range.  The
+  marginal willingness to pay (WTP) is particularly high at low birth weights,
+  and turns negative at higher weights.  Nonetheless, back-of-the-envelope
+  calculations suggest that the parental WTP for birth weight still falls short
+  of the expected present value of birth weight on the labour market for a
+  US-born child.
+  %We document that the private WTP is of
+  %a similar size[???] to the inferred \emph{public} WTP based on large programs such
+  %as WIC.
+\end{abstract}
+\emph{JEL Classification Codes}: H31, I10, J01, J13, C90.\\
+\emph{Keywords}: Birth weight; Infant health; Willingness to Pay; Discrete
+Choice Experiments.
+
+\newpage
+\section{Introduction}
+%-------------------------------------------------------------------------------
+A baby's birth weight is the most frequently measured and used endowment to
+capture the immediate stock of health early in life \citep{AlmondCurrie2011}.
+The importance of the fetal period as a predictor of health throughout the life
+course has been recognised in a series of influential papers by Barker and
+coauthors on the fetal origins of disease \citep{Barkeretal1989,Barker1990,
+  Barker1995}, with considerable and ever-growing evidence in economics that
+insults to fetal
+health have enduring and considerable costs throughout life \citep{Almond2006,
+  CurrieMoretti2007,Caseetal2005,Almondetal2009,Blacketal2007}.
+These findings justify considerable investments in programs targeted at
+babies with poor endowments early in life, such as those focusing on low birth
+weight babies \citep{Almondetal2005,Bharadwajetal2013} and pre-natal nutrition
+programs such as the Special Supplemental Nutrition Program for Women Infants
+and Children (WIC).\footnote{The total national spending on WIC in 2015 was 6.2
+billion dollars.}
+
+Despite a large body of evidence on the importance of birth weight, and
+considerable public investment in programs targeting birth weight, little is
+known regarding the parental---or private---valuation of birth weight.
+To the degree that a wide range of (costly) parental behaviours can
+positively impact birth weights \citep{RosenzweigSchulz1983,
+  ChevalierOSullivan2007,SextonHebel1984}, the perceived importance of
+birth weights to parents may have important effects on these behaviours,
+and on birth weight and child outcomes throughout the life course. Thus,
+knowing the value which parents place on birth weight is a key ingredient
+to policies focused on parental behaviour prior to and during gestation.
+
+In this paper we aim to provide the first estimates of the importance of
+birth weight to parents, and estimate parental Willingness to Pay (WTP)
+for additional birth weight.
+In order to do so, we conduct a series of discrete choice experiments
+on Mechanical Turk, an online survey platform increasingly used both
+within and outside of the economic literature \citep{Kuziemkoetal2015,
+  Jordanetal2016}).  We conducted these experiments with approximately
+1,000 respondents, who were asked to consider approximately 14,000
+different birth profiles.  Specifically, we performed conjoint analysis,
+a method first described by \citet{Lancaster1966} which has recently
+been shown to perform more favourably than experimental techniques when
+compared with real-world choice behaviour \citep{Hainmuelleretal2015}.
+These experiments consist of
+asking respondents to consider a series of birth outcomes, with a number
+of different characteristics, each orthogonally varied both within and
+between experimental subjects.
+
+These experiments allow respondents to reveal their preferences (or lack
+of preferences) over a range birth characteristics.  In particular, we
+randomise jointly over a baby's birth weight, birth timing, birth costs,
+and gender.  While focusing here on the value of birth weight, these
+experiments lead to a number of interesting findings related to the
+demand for other previously documented birth outcomes such as the demand
+for sons \citep{DahlMoretti2008} and the demand for season of birth
+\citep{Clarkeetal2016}.  Throughout this paper
+we focus on birth weight over the normal range of 2,500 to 4,000 grams.
+While many studies focus on low birth weight (LBW, or weights less than
+2,500 grams) as their indicator of interest, we restrict our analysis
+to the ``normal'' range for a number of reasons.  Firstly, it has been
+shown that continuous measures of birth weight actually have greater
+explanatory power for a large range of variables than an LBW indicator
+\citep{Blacketal2007}.  Secondly, recent evidence suggests that marginal
+increases in birth weight are particularly important for well being within
+this normal weight range.  \citet{Royer2009}, for example suggests that
+babies born in the normal range of weights should receive \emph{more}
+research attention\footnote{In full, \citep{Royer2009} reports (p.\ 52):
+  \begin{quote} ``I find that the effects of birth weight on long-run
+    outcomes are nonlinear and for educational attainment, in particular,
+    are largest above 2,500 grams, the cutoff for defining low birth weight.
+    These findings suggest that babies with birth weights outside the
+    lower tail of the distribution (i.e., outside the range of low birth
+    weight) should receive more attention.''
+  \end{quote}
+}.  Finally, from a purely practical standpoint, we focused on the
+normal range of birth weights to avoid respondents linking low birth
+weight with other health conditions, thus confounding our estimates
+for the WTP of birth weight alone.
+
+Our results suggest that, similar to researchers and policy makers,
+parents view birth weight as an important and valuable characteristic.
+All else constant, a baby weighing 3,400 grams (7lbs, 8oz) is 18\%
+more likely to be chosen than one weighing 2,500 grams (5lbs, 8oz).
+We estimate that over the normal range of birth weights examined,
+experimental participants would be willing to pay \$1.44 for each
+additional gram of weight, and that those for who are parents, this
+WTP rises to \$1.72.  What's more, we observe a hump-shaped (or inverse
+J) relationship in WTP, with the marginal WTP becoming negative
+at the top end of the range.  Interestingly, this pattern mirrors
+the estimated effect of birth weight on health \citep{Caseetal2005}
+and on salary \citep{BehrmanRosenzweig2004}.
+
+Despite the positive and economically significant estimates for the
+WTP for birth weight, using a range of recent results which estimate
+the long-run returns to birth weight\footnote{These include
+  \citet{JohnsonSchoeni2011,CookFletcher2015,BehrmanRosenzweig2004} (USA);
+  \citet{Blacketal2007} (Norway); \citet{Bharadwajetal2015} (Sweden);
+  \citet{RosenzweigZhang2013} (China); and \citet{CurrieHyson1999,
+    Caseetal2005} Great Britian.  We provide a full discussion of these
+  estimates and their methodologies in section \ref{returnsBW}.},
+back-of-the-envelope calculations suggest that the present value of the
+labour market returns exceed parental WTP by a factor
+of approximately 4 or 5. This is a puzzle, given that parents have been
+shown to generally invest greater in a child's health than their own
+health \citep{AgeeCrocker2008}. What's more, the labour market returns
+to birth weight are only a subset of the full returns.  Convincing
+evidence suggests that increases in birth weight reduce the prevalence
+of chronic morbidities \citep{Barker1995,AlmondMazumder2005,
+  JohnsonSchoeni2011b}, mortality \citep{vandenBergetal2006}, and a
+range of psychological outcomes \citep{Fletcher2011}.\footnote{Here we
+  focus largely on the long-run impacts of birth weight over an
+  individuals' life.  However, there is an additional even larger body of
+  work documenting the importance of birth weight in explaining early life
+  outcomes and human capital outcomes in childhood. These include
+  \citet{Almondetal2005,Oreopoulosetal2008,Guptaetal2013,Conleyetal2003,
+    Figlioetal2014,LinLiu2009,Fletcher2011,Bharadwajetal2017,
+    TorcheEchevarria2011} among many others.} 
+One potential explanation for this finding is that parents under-estimate
+the returns to birth weight.  In an influential paper, \citet{Jensen2010}
+demonstrates that correcting expectations regarding the returns to
+education increases investments in education.  Our results potentially
+open the door to a similar phenomena in early life health.  If parents
+are not aware of the magntiude of returns to birth weight, they may be
+investing sub-optimally in pre-natal behaviours.
+
+In what follows, we describe the Mechanical Turk data and experimental
+set-up in section \ref{scn:data} and describe the methodology for
+estimating parental WTP and its confidence intervals in section
+\ref{scn:methods}.  In section \ref{scn:results} we discuss our
+experimental estimates for the value of birth weight, and then compare
+them to a series of papers which estimate the value of birth weight on
+the labour market.  We briefly conclude in section \label{scn:conclusion}.
+
+\section{Data}
+\label{scn:data}
+We collected data on preferences over birth characteristics by running a
+discrete choice experiment on Amazon's Mechanical Turk (MTurk) online platform.
+This platform is a market place which provides access to a pool of US MTurk
+workers (survey respondents) who are paid per completed ``HIT'' (Human
+Intelligence Task).  We recruited a sample of respondents to complete a
+discrete choice experiment (described further below) as well as a series of
+demographic questions.  These demographic questions were asked after the
+completion of the survey to avoid any framing or experimenter demand effects.
+Mechanical Turk respondents have been documented to have a series of desirable
+characteristics, and be more representative of the US population than other
+frequently-used subject pools such as college student samples
+\citep{Berinskyetal2012}.  Mechanical Turk samples are increasingly used both
+within and outside of the economic literature (see for example
+\citet{Kuziemkoetal2015,Jordanetal2016}).
+
+We recruited a sample of 1,002 respondents aged 18 or over, and conducted
+the experiment on Monday September 19\textsuperscript{th}, 2016.  Workers
+were paid \$1.10 for a 6 minute experiment (average length), resulting in
+an effective hourly pay rate of approximately \$11.  We required that
+respondents must be from the United States\footnote{Workers on Mechanical
+  Turk require a United States Social Security Number.}, and in order to
+maximise the likelihood that workers were based in the US at the time of
+completing the survey, the survey was launched at 9:00 AM EST.  By 2:13 PM
+of the same day 1,002 valid responses were collected.  We also required
+that workers had completed at least 100 tasks on MTurk in the past, and
+had achieved an approval rating of greater than 95\% on these tasks.
+These restrictions have been used in the past in Mechanical Turk research
+\citep{Berinskyetal2012,Francis-TanMialon2015}.  Of the 1,002 completed
+respondents, we removed a small number based on a series of pre-defined
+consistency checks.  These were: (a) workers whose geographical IP address
+placed them outside of the US at the time of survey (36 respondents, or
+3.6\%), any respondents who failed a consistency check where a question was
+repeated at the beginning and end of the demographic portion of the survey
+(8 respondents), and any respondents completing the entire exercise in
+under 2 minutes (6 respondents).\footnote{In the appendix to this paper we
+  demonstrate that nonetheless, our results remain largely unchanged if we
+  do not remove these respondents.}  The final sample thus consists of 952
+respondents.
+
+The geographic location of these respondents within the United States (based
+on their IP address) is provided in figure \ref{geography}.  The geographic
+coverage is broadly representative of the US population.  In appendix table
+\ref{tab:cover} we compare our MTurk respondent coverage with the US population
+from 2015 \citep{CensusBureau2015}.  In general we see that the MTurk sample
+lines up well with the national population at the state level, however there
+are a number of exceptions, such as the lower number of respondents from
+California.  In our principal specifications we always use the unweighted
+MTurk sample, however as an alternative test we also re-weight the sample
+to balance state and demographic characteristics, as suggested by
+\citet{Francis-TanMialon2015}, and discussed further in the following section.
+
+Finally, summary statistics of the respondents are provided in table
+\ref{sumstats}.  Slightly more than half of respondents are female (56\%),
+and the ages of respondents range from 18 to 75 years (with a mean age of 36
+years).  Approximately half of respondents are parents (51\%).  Experimental
+respondents are both married (45\%) and unmarried, employed (68\%) and
+unemployed, and come from a range of education levels (although 89\% have
+at least some college).
+%\textcolor{red}{DISCUSS
+%  HERE COMPARISON WITH USA POPULATION.  SHOULD WE USE ACS TO COMPARE? Alternative
+%  is to just use census bureau with averages already online (from ACS) to re-weight
+%  by gender, race, age and marital status(?)}
+%\subsection{Birth Certificate Data}
+%\subsection{Mechanical Turk Survey Data}
+
+
+\section{Methodology}
+\label{scn:methods}
+%\subsection{Observable Determinants of Birth Weight}
+%\subsection{Eliciting Willingness to Pay in a Discrete Choice Experiment}
+In order to estimate the perceived importance of birth weight, and the willingness
+to pay for additional weight, we run a Discrete Choice Experiment (DCE) on a
+large sample of US-based respondents. A DCE is a type of Conjoint Analysis (CA):
+an experiment in which respondents are asked to choose their preferred option
+from a set when a number of attributes are varied simultaneously.
+CA was borne from early work in consumer theory in which tastes for goods owe
+to the collection of their characteristics \citep{Lancaster1966}.  In the
+past CA has been used to measure preferences over medical care in a variety of
+contexts, including the valuation of waiting times \citep{Propper1990,Propper1995},
+alternative miscarriage treatment options \citep{RyanHughes1997}, asthma
+medications \citep{Kingetal2007}, or depression management \citep{Wittinketal2010}.
+Conjoint analysis has recently been shown to be the best-performing experimental
+design when compared with actual choices made \citep{Hainmuelleretal2015}.
+
+The birth choice experiment consists of asking respondents to consider a series
+of two birth outcomes, while focusing on four attributes of each birth.  These
+attributes are the sex of the child (Boy or Girl), the out of pocket expenses
+associated with the birth (\$250, \$750, \$1000, \$2000, \$3000, \$4000, \$5000,
+\$6000, \$7500, or \$10000), the baby's weight at birth (5lbs, 8oz; 5lbs, 13oz;
+6lbs, 3oz; 6lbs, 8oz; 6lbs, 13oz; 7lbs, 3oz; 7lbs, 8oz; 7lbs, 13oz; 8lbs, 3oz;
+8lbs, 8oz; or 8lbs, 13oz), and the season in which the baby is born (Winter,
+Spring, Summer or Fall).  These attributes are all orthogonally varied, implying
+that the effect of each characteristic on the likelihood that a particular birth
+is chosen is separately identified \citep{Marshalletal2010}. Each respondent 
+was asked to consider 7 pairs of birth outcomes in an iterative fashion.  In
+order to move forward in the experiment a choice must be made for each pair,
+and once the choice has been made the respondent may not go back and revise their
+choice.  In each case the two pairs
+were displayed side-by-side on a single screen, and respondents were asked to
+indicate which was their preferred outcome.  As well as randomising the level
+of each attribute on each profile, the order of the attributes was randomised,
+however to reduce the cognitive load to respondents the ordering of attributes
+was only randomised once, and then fixed across the seven pairings that the
+respondent ranked.  The
+DCE's framing and the explanation of the attributes shown to respondents is
+displayed in appendix figures \ref{DCE-frame} and \ref{DCE-options}.  In
+appendix figure \ref{DCE-example} we display a single choice scenario as
+presented to respondents.  Appendix \ref{app:procedure} describes the
+survey procedure followed by respondents.
+
+The levels of attributes were chosen to represent plausible values from the
+US population \citep{RyanFarrar2000}, and extreme values were avoided to
+prevent the likelihood of ``grounding effects'' (or corner solutions).  In
+order to minimise the likelihood that respondents would employ simple
+heuristics in answers, we limited the number of attributes (4) which need be
+considered.  Birth weights were always presented in pounds and ounces, given
+that this experiment was entirely run with a US-sample familiar with the
+imperial measurement system.  As well as indicating
+that all births were complication-free, only birth weights over the normal
+range of 2,500--4,000 grams were included (11 evenly-spaced weights were
+defined in this range, and expressed in pounds and ounces in the experiment).%
+\footnote{This range includes the majority of all births in the US.  According
+  to full vital statistics from
+  2013 (from the National Vital Statistics System), 15.91\% of births occurred
+  with weights outside of this range (refer to appendix figure \ref{bwt-nvss}.)
+  Of these, 8.02\% were low birth weight ($<$ 2,500 grams), and 7.89\% were
+  large for gestational age at birth ($>$ 4,000 grams).
+} 
+An opt-out option was not included in any of the discrete choices.  This
+has been suggested to have desired properties such as avoiding non-random
+opt-out of all questions \citep{Veldwijketal2014,BekkerGrobetal2012}.  
+
+Consider a sample of $i\in \{1,\ldots,N\}$ individuals, each of whom consider
+$K$ choice tasks in which they must decide between $J$ options (or profiles).
+Each profile contains $L$ attributes, where each particular attribute $l$
+consists of discrete levels of the variable.  In the case of the DCE
+described above, we have $N=952$ respondents, $K=7$ choice tasks per
+respondent, $J=2$ profiles per task, and $L=4$ attributes.\footnote{These
+  4 attributes have 2, 10, 11 and 4 levels respectively for sex, out of pocket
+  costs, birth weight and season of birth.} We follow
+\citet{Hainmuelleretal2013} in defining a treatment vector $T_{ijk}$.
+This treatment vector has $L$ cells, and summarizes for individual $i$,
+at choice task $k$, for profile $j$, the full set of attributes observed.
+Each particular attribute $T_{ijkl}$ is randomly assigned from among all
+the levels of $l$, the assignation of which is orthogonal to all other
+attributes the respondent sees.  Using the potential outcomes framework,
+we define a binary variable $Y_{ijk}(\bar{\mathbf{t}})$ which takes the
+value 1 if respondent $i$ would choose profile $j$ on choice set $k$ if
+faced with the set of attributes $\bar{\mathbf{t}}$, or 0 if the profile
+would not be chosen.
+
+We are interested in estimating two quantities.  Firstly, we would like to
+estimate, \emph{ceteris paribus} the likelihood that a birth is chosen given
+that a particular birth weight is observed (compared with an omitted base
+category).  Secondly, we would like to estimate the willingness to pay for
+season of birth, by combining the information from both variations in birth
+weight and variations in out-of-pocket costs.
+
+\citet{Hainmuelleretal2013} call this first quantity the Average Marginal
+Component Effect (AMCE) and demonstrate that under reasonably weak
+assumptions\footnote{These assumptions relate to randomization of attributes,
+  and stability of respondent behaviour regardless of the number of profiles
+  that they have seen or the order of the attribute in the profile.  This
+  first assumption holds by construction in our experiment.  In the following
+  section we return to explicitly test for violations of the latter two
+  assumptions.  A benefit of the set-up of the DCE is that even if order and
+  round effects are not completely neutral, these can be flexibly captured
+  using fixed effects in a regression.}, it can be recovered using a
+non-parametric subclassification
+estimator, conditional regression, or a simple difference of means.  The
+logic of the AMCE\footnote{Formally, the AMCE is defined as
+  \citep{Hainmuelleretal2013}:
+  \[
+  E[Y_i(t_1,T_{ijk[-l]},\mathbf{T}_{i[-j]k})-Y_i(t_0,T_{ijk[-l]},\mathbf{T}_{i[-j]k})|(T_{ijk[-l]},\mathbf{T}_{i[-j]k})\in\tilde{\mathcal{T}}]
+  \]
+  which can be quite easily calculated by integrating over all of the other
+  attributes and levels except for $t_1$ (the treatment of interest) and $t_0$
+  (the baseline level for the attribute). These other attributes and levels are
+  denoted as the set $\tilde{\mathcal{T}}$ here.} is to capture the change in
+the likelihood that a given profile would be chosen if the
+$l$\textsuperscript{th} component were changed from $t_0$ to $t_1$, or in our
+case, a change in birth weight.
+
+Under the controlled randomization in conjoint analysis, \citet{Holland1986}'s
+fundamental problem of causal inference is resolved by construction, as on
+average there will be no correlation between observing the particular level
+of an attribute and individual correlates. Treatment units are thus those who
+observe a particular $t_1$, while those who do not act as controls.  In
+practice to estimate the change in likelihood that a particular birth weight
+(or any attribute) changes the likelihood that a birth is chosen, we estimate
+the following regression:
+\begin{equation}
+  \label{ACMEreg}
+Pr(Y_{ijk}=1) = \alpha + \beta Costs + \sum_{l=2}^{11} \gamma_l BW_l + \sum_{l=2}^{4} \delta_l SOB_l +  \kappa Girl + \mu_j + \phi_k + \varepsilon_{ijk}.
+\end{equation}
+Here we can include option and profile order fixed effects ($\mu_j$ and
+$\phi_k$ respectively)\footnote{In practice, if there are no round
+or position effects, rather than estimating the conditional regression in
+equation \ref{ACMEreg}, we could simply take the difference of means. However
+given that we find weak evidence that there is some instability in choices
+between rounds (appendix figures \ref{DCE-asm2}-\ref{DCE-asm3}), we elect to
+include controls for $\mu_j$ and $\phi_k$.}, and standard errors are clustered
+at the level of the respondent to capture the (likely) positive correlations
+among choices based on attributes by a particular respondent.\footnote{This
+  will capture, for example, that a respondent who is encouraged to choose
+  a particular birth given a higher birth weight being similarly likely to
+  choose other birth options when observing higher birth weights.} The
+coefficients $\gamma_l \ \forall\ l$ are the principal effects of interest,
+and capture the likelihood that a birth is chosen given a particular birth
+weight.  We omit from the regression the lowest birth weight category as the
+baseline level, implying that all coefficients should interpreted as the
+marginal likelihood of choosing a birth given birth weight $l$ in place of
+the lowest birth weight (2,500 grams).
+
+In the above model, we are also able to estimate willingness to pay for a
+marginal change in birth weight.  Consider the two AMCEs, $\beta$ and $\gamma_2$
+(where $\gamma_2$ is chosen without loss of generality).  These coefficients
+represent the marginal effect on the likelihood of choosing a particular birth
+given an increase in the particular attribute, conditional on all other
+attributes:
+\[
+\beta=\frac{\partial Pr(Y_{ijk}=1)}{\partial Costs} \qquad \gamma_l=\frac{\partial Pr(Y_{ijk}=1)}{\partial BW_2}.
+\]
+The marginal rate of substitution between the particular birth weight $BW_2$
+and the price of a given birth (the out of pocket costs) thus gives the change
+in costs that an average respondent would willing to withstand for a marginal
+increase in birth weight:
+\[
+MRS_{BW,Costs}=\frac{\frac{\partial Pr(Y_{ijk}=1)}{\partial BW_2}}{\frac{\partial Pr(Y_{ijk}=1)}{\partial Costs}}.
+\]
+The quantity is precisely the willingness to pay, ie, the change in financial
+resources that makes a respondent indifferent between the higher or lower birth
+weight:
+\[
+WTP_{BW}=-\frac{\gamma_2}{\beta}=-\frac{\partial Cost}{\partial BW_2}.
+\]
+Note that in the above calculation we take the negative so that costs are
+interpreted as the (positive) amount that must be paid rather than the
+(negative) change in financial resources.  This $WTP_{BW}$ can also be
+derived quite straightforwardly from a model of the indirect utility
+function as described in \citet{Zweifeletal2009}, and applied in
+\citet{Clarkeetal2016}.
+
+Unlike the calculation for the ACME for birth weight, the above WTP
+is not associated with a standard error and confidence interval.  In
+order to calculate the confidence intervals associated with the WTP
+we use the delta method, which is both simple and shown to perform
+well under simulation \citep{Hole2007}.  We also find that these
+confidence intervals are quite comparable to those produced when using
+block bootstrapping, as outlined further in the following section. 
+
+\section{Results}
+\label{scn:results}
+\subsection{The Experimental Valuation of Birth Weight}
+\label{sscn:expR}
+In figure \ref{DCE-samp} we present experimental results.  This figure
+displays point estimates of the likelihood of preferring a particular
+birth given each characteristic, compared with an omitted base category
+for each characteristic.  Along with each point estimate, the 95\%
+confidence interval is plotted, clustering by individual.  In figure
+\ref{DCE-samp} we present cost as a linear variable measured in 1000s of
+dollars.  In appendix figure \ref{DCE-full-samp} the same results are
+presented with costs displayed as the same categorical measure observed
+by respondents.
+
+The top panel displays the likelihood of choosing a birth given a
+particular birth weight, compared to being shown the minimum sample
+birth weight of 5lbs, 8oz (2,500 grams).  In each case higher birth
+weights are associated with a greater likelihood of choosing the
+birth.  The most preferred birth weight (based on point estimates) is
+7lbs, 8oz (3,400 grams), which results in a birth being approximately
+18\% more likely to be chosen than the omitted base category.  The
+magnitudes of the estimates are large.  With the exception of 5lbs, 13
+oz, all higher birth weights are at least 10\% more likely to be chosen,
+and in each case the difference is statistically significant.  What's
+more, there appears to be a hump-shaped pattern, with the most
+preferred births being those towards the middle of the (normal) birth
+weight range, and lower preferences for those at the extremes of the
+normal weight range.  We return to this point below when discussing
+the estimates for the willingness to pay for birth weight.
+
+Briefly, turning to other characteristics included in the conjoint analysis,
+we find no evidence of any elicited preference for the baby's gender
+on average in the full sample.  Indeed, in both specifications displayed
+in table \ref{WTPreg} estimated coefficients on the baby being a girl are
+quite tightly estimated zeros (ranging from 0.000 to 0.001 with clustered
+standard errors of 0.010). This finding echoes that in \citet{LhilaSimon2008}
+who find no evidence of differential investments \emph{in utero} in boy and
+girl children in the US when the gender is known.  However, when estimating
+separately by the gender of the respondent, we do observe a preference for
+boy children among male respondents (table \ref{WTPgreg}). This is in
+agreement with the results of \citet{DahlMoretti2008} who document a demand
+for sons, particularly among fathers.  When considering season of birth
+we observe a greater likelihood to choose births in the spring, evidence
+of a demand for certain seasons of birth \citep{Clarkeetal2016}. Finally,
+and as expected, we observe that all else equal, higher costs result in
+a birth being less likely to be preferred.  On average, for each additional
+\$1000 in out of pocket expenses, the likelihood of choosing a birth falls by
+nearly 10\%.  The non-linear estimates of these parameters are displayed
+in appendix figure \ref{DCE-full-samp}.
+
+As discussed in section \ref{scn:methods}, we can combine estimates of
+characteristics with those on out of pocket costs to generate estimates
+of the willingness to pay for each characteristic.  In table \ref{WTPreg}
+we present regression results which display the coefficient on birth weight
+(assuming in column 1 a linear functional form for birth weight).  By comparing the change
+in likelihood of choosing a birth based on an increase in birth weight
+with the change in likelihood due an increase in costs, we estimate that
+the willingness to pay for an additional 1000 grams in the full sample
+is \$1438.3, or \$1.44 per gram.  However, as we observe in column 2,
+the relationship between birth weight and likelihood of choosing a birth
+is non-linear.  In figure \ref{WTP-relative} we document the WTP of all
+birth weight options, with respect to the minimum birth weight in the
+sample.  We observe that the largest relative difference occurs at 3,400
+grams (compared with the omitted base of 2,500 grams), with a WTP of
+nearly \$3000USD, or \$2.14 per gram.
+
+In table \ref{WTPgreg} we observe that the WTP is highest among parents,
+at \$1.72 per gram, compared to \$1.17 among those who are not (currently)
+parents.  Perhaps unsurprisingly, parents are much more likely than
+non-parents to be swayed by changes in non-pecuniary outcomes: for parents
+birth weight and birth season are considerably more important than for
+non-parents, while non-parents place marginally greater weight on an
+increase in costs.  Similarly, in table \ref{WTPgreg} we present estimates
+splitting by the gender of the respondent.  Interestingly, the WTP for
+birth weight is actually greater among male (\$1.66 per gram) rather than
+female (\$1.28 per gram) respondents.  While female respondents are much
+more likely to choose a birth when falling in a favourable season, male
+respondents are more likely to choose a birth given greater birth weight.
+While not conclusive, it is worth noting that these results are in line with
+the fact that the impacts of a baby's birth weight affect both mothers and
+fathers in a similar way, while the costs of birth season (and hence timing
+of pregnancy) fall much more on mothers who experience pregnancy in
+different seasons of the year, perhaps rationalising the observed
+differences in columns 4 and 5.
+
+When calculating the WTP of birth weight as a single figure, this is
+based on a specification in which birth weight (and costs) enter the
+estimating equation linearly.  However, in figure \ref{WTP-relative} we
+display the fully non-parametric estimates where birth weight enters
+the model in the same bins as displayed to experimental participants.
+Figure \ref{WTP-relative} provides the WTP for each particular birth
+weight, as compared to a birth weight of 2,500 grams (or the relative
+willingness to pay).  In figure \ref{WTP-marginal} we also present the
+marginal WTP, or the difference in WTP when moving between contiguous
+categories.  It is observed that the largest marginal change occurs
+at the lower end of the distribution, when moving from approximately
+2,600 to 2,800 grams, and that at the upper end of the birth weight
+range, the marginal WTP turns (significantly) negative, when moving
+from 3,800 to 4,000 grams.  Interestingly, this hump shaped relationship
+lines up with a range of evidence related to the \emph{benefits} of
+birth weight.  For example, \citet{Caseetal2005} show a similar
+hump-shaped relationship for the effect of birth weight on health,
+with increases in (self reported) health as an adult as birth weight
+increases, though a point of inflexion at very high birth weights
+(see for example their figure 1).\footnote{Indeed, this hump-shaped,
+  or ``inverse J'' pattern is commonly observed in many morbidity and
+  mortality measures across populations \citep{Wilcox2001}.} Similarly,
+\citet{BehrmanRosenzweig2004}
+find a point of inflection of the labour market returns to birth weight
+which lines up quite closely with our estimates (specifically, they
+find that for births approximately 2 standard deviations above the mean
+of fetal growth\footnote{Although these values can not be precisely
+  converted to birth weight from the rate of fetal growth reported by
+  \citet{BehrmanRosenzweig2004}, an approximate calculation suggests
+  that if fetal growth is a good proxy for birth weight and hence the
+  turning point for birth weight is similarly two standard deviations
+  above the mean, this would result in a turning point of
+  $90.2 oz + 2\times 17.9 oz = 126 oz$, or 3.572 kg (all values from
+  \citet{BehrmanRosenzweig2004} table 1 and figure 8).}, labour market
+returns to a marginal increase in birth weight turn from positive to
+negative). We return to these estimates further below in section
+\ref{returnsBW}.  
+
+The confidence intervals estimated on willingness to pay discussed
+above are always calculated using the delta method.  However, we find
+relatively little difference if we estimate confidence intervals under
+block bootstrapping.  In order to implement this block bootstrap
+procedure we perform 1,000 bootstrap replications, resampling with
+replacement over experimental \emph{respondents} rather than over
+profiles.  This block bootstrap calculation leads to a 95\% confidence
+interval for willingness to pay of [\$1107.2;\$1769.3] for the main
+sample.  This is marginally wider, though qualitatively very similar to
+the main calculation using the delta method reported in table \ref{WTPreg}
+of [\$1119.4;\$1757.1].  In all cases examined, block bootstrap confidence
+intervals lead to largely similar findings, and in some cases even lead to
+slightly \emph{less} wide confidence intervals. Full comparisons of
+confidence intervals between methods are available in appendix table
+ \ref{bootstrapCI}.
+
+%SHOULD WE MENTION THE ``13 EFFECT''?
+%\paragraph{Population Re-weighting}
+
+\paragraph{Comparing Public and Private Willingness to Pay}
+Our principal specifications suggest that parents are willing to pay
+\$1.72 for each additional gram of birth weight over the normal birth
+weight range.  It is of interest to ask how this private WTP compares
+with the inferred WTP from public investment.  While much of the benefits
+of increases in birth weight accrue to families such as private returns
+on the labour market, a reduction in out of pocket medical spending during
+childhood, and increases in education \citep{BehrmanRosenzweig2004,
+  Oreopoulosetal2008}, nonetheless increases in birth weight also have
+important public returns.  These returns include, among other things,
+benefits flowing from reductions in public health care spending,
+and lower usage of means-tested public benefits programs
+\citep{Almondetal2005,Bharadwajetal2015}.
+
+We can provide a rough comparison between public and private WTP for
+birth rate using estimates from the Special Supplemental Nutrition
+Program for Women, Infants, and Children (WIC).  The WIC program,
+which provides food and education to pregnant and postpartum
+breastfeeding women who earn less than 185\% of the US federal
+poverty guideline.  A comprehensive discussion of recent work on
+WIC is available in \citet{BitlerKaroly2015}.  By combining estimates
+of the cost per WIC user with estimates of the benefit in terms of
+additional birth weight, we can arrive at a rough estimates of the
+public WTP per gram of birth weight.
+
+\citet{BenShalometal2011} document that WIC participation costs
+\$54 per enrollee per month.  And according to WIC administrative
+data, 56.9\%, 34.7\% and 7.8\% of participants enroll in the first,
+second or third trimester respectively \citep{Johnsonetal2013}.  Using trimester midpoints
+to calculate months of enrollment, this suggests total approximate
+costs of covering a single pregnant women of \$321.\footnote{This
+  is calculated
+  as \[
+  Cost = 54\times (7.5\times0.569+4.5\times0.347+1.5\times0.078) = \$321.1.
+  \].}
+There exist a very large range of estimates of the impact of the WIC
+program---with some estimates suggesting effects of up to 185 grams
+\citep{KowaleskiJonesDuncan2011}---however more recent studies suggest
+that the true impact may fall towards the lower end of the estimated
+spectrum.  Among plausibly causal estimates, \citet{RossinSlater2013}
+estimates that participation has a mean impact of 27 grams of birth weight,
+and \citet{Hoynesetal2011} estimate impacts of 18-29 grams.  Regardless of
+the estimates used, the public WTP exceeds our experimental estimates
+of parental WTP.  In the case of the highest estimated impact, public
+WTP equates to \$321/181 grams = \$1.77 per gram, while at the lower
+end of the spectrum, the WTP equates to \$321/27 grams = \$11.89 per gram.
+
+%From Royer:
+%``The fetal origins hypothesis has many important economic implications. It would
+%suggest that policies that aim to improve the prenatal environment (e.g., Medicaid
+%expansion for pregnant women and the Special Supplemental Nutrition Program for
+%Women, Infants, and Children (WIC)) could reap large long-run health, human capital,
+%and wage returns for both current and future generations. Such effects are often
+%ignored in cost-benefit calculations, potentially leading to an underinvestment in
+%these programs.''
+
+
+
+\subsection{WTP and ``The Returns to Birth Weight''}
+\label{returnsBW}
+Although there exists little or no evidence on the parental valuation of
+birth weight, a broad literature from various fields has documented
+the returns to birth weight.  It is well accepted that higher birth
+weight is associated with reductions in morbidity and mortality, and
+greater educational attainment and achievement throughout
+childhood.\footnote{For example, on morbidity, refer to
+  \citet{Almondetal2005,Oreopoulosetal2008,Guptaetal2013,Conleyetal2003},
+  and on early-life education, among others \citet{Figlioetal2014,
+    LinLiu2009,Fletcher2011,Bharadwajetal2017,TorcheEchevarria2011}
+  demonstrate a strong and plausibly causal link.}  What's more, these
+impacts have been well-documented to perdure into adulthood and impact
+labour market returns.  Recent large-scale evidence from Sweden suggests
+that in some contexts at least, labour market returns to birth weight do
+not fade out until at least 50 years of age or greater
+\citep{Bharadwajetal2015}.
+
+In table \ref{litrev} we review the range of papers which have estimated
+the long-run returns to birth weight.  The data requirements for such an
+exercise are quite demanding, requiring information on the weights of
+babies at birth, family linkages, and completed education or labour market
+outcomes many years later.  Nevertheless, in a range of contexts in USA,
+China, Norway, Sweden, Canada and the UK this has been possible.  Of
+particular interest for this paper are the returns to birth weight on
+the labour market.  One way to benchmark the parental WTP for child
+birth weight is to determine how it compares to the present value of the
+flow of expected benefits during the life of their child. Thus,
+considering these well-estimated cases of the labour market returns to
+birth weight, we can discount expected returns back to the start of an
+individual's life, and compare it with our experimentally estimated
+WTP.\footnote{This should of course be considered as a lower bound to
+  the true value of birth weight.  Labour market returns are a convenient
+  financial metric, but do not include any of the additional pecuniary or
+  non-pecuniary benefits which may flow to parents from a higher birth weight
+  child such as lower expected costs associated with medical care
+  \citep{Almondetal2005}.}
+
+
+This exercise is well suited to the experiment documented in section
+\ref{sscn:expR} of this paper.  The most convincing empirical estimates
+produced from the literature come from within-sibling or within-twin
+methods, which can be viewed as the effect of shifting the smaller of
+two siblings (or twins) to the weight of the larger sibling (twin).
+Our experimental estimates of WTP are taken as the relative to the
+omitted baseline category of 2,500 grams.  So, in the sense that we
+think of 2,500 grams as the lower weight of a comparison pair, all
+our experimental estimates line up to the effect of additional
+intrauterine growth reported by the within twin or within family
+literature reviewed in table \ref{litrev}.
+
+For this exercise, we are most interested in those papers which
+provide estimates of the long-run returns to birth weight on the
+labour market.  This precludes studies which only observe completed
+education, but not labour market outcomes
+described in panel B of table \ref{litrev}.\footnote{A notable
+  exception is the study of \citet{Royer2009}, which although only
+  having individual level on education, also has income at the zip
+  code of residence of the individual.  As we discuss further below,
+  we use the zip code averages of income as a consistency check for
+  our methodology.} Among those papers which have estimated the effect
+of birth weight on labour market returns, there are six papers that
+use twin or sibling fixed effects to leverage within family variation
+in birth weight to estimate returns conditional on genetic material.
+These are \citet{BehrmanRosenzweig2004,JohnsonSchoeni2011,CookFletcher2015},
+using data from the USA, \citet{Blacketal2007} using Norwegian data,
+\citet{Bharadwajetal2015} using Swedish data, and
+\citet{RosenzweigZhang2013} with Chinese data.  Of these 6, all with
+the exception of \citet{JohnsonSchoeni2011} estimate
+the impact of increases in (continuous) birth weight rather than
+a binary indicator for low birth weight (LBW), or birth weights
+inferior to 2,500 grams.  Of those five studies which use a continuous
+measure of birth weight and between twin estimation strategy, all find
+that headline effects of birth weight on labour market returns is positive
+and significant.
+
+In order to generate a back-of-the-envelope comparison of the WTP
+for birth weight with the present value of expected labour market
+returns, we begin with the estimates of \citet{BehrmanRosenzweig2004}
+from the USA.  \citet{BehrmanRosenzweig2004}'s results provide
+a point estimate of the labour market returns to birth weight which
+suggests that ``augmenting a child's birth weight by a 1 lb.\ increases
+her adult earnings by over 7\%''.  According the \citet{USCB2016},
+the median personal income in the US in 2015 was \$30,240.  If we assume
+a working life which begins at the age of 25 and ends at the age of
+60, we can calculate the present value of a 7\% increase in wages as
+a deferred annuity.  This calculation suggests that, based on the
+estimates of \citet{BehrmanRosenzweig2004}, the present value of an
+additional pound of birth weight is \$10,235.\footnote{We calculate the
+  present value as
+  \[
+  PVBW = (\$30240\times0.07)\times\frac{1-(1+0.05)^{-35}}{0.05}\times\frac{1}{(1+0.05)^{25}}=\$10235.46
+  \]
+}  Dividing this value by the 454 grams in a pound gives the labour
+market value of a gram of weight of $\$23$.  Including if we assume
+that only approximately 60\% of the working age population will
+actually be employed in the labour market \citep{BLS2017}, scaling
+by this value still suggests a labour market return of approximately
+\$14, an order of magnitude higher than our estimated values of WTP.
+
+This back-of-the-envelope calculation using
+\citet{BehrmanRosenzweig2004}'s (US) estimates is a very crude estimate, 
+relying on a number of assumptions that are unlikely to hold in
+practice.  Principal among these is that the returns to birth weight
+are stable over the life course, and salary and labour market participation
+rates are also stable over the life course.  In order to examine the
+stability of this crude calculation to a more flexible set of estimates,
+we turn to the results of \citet{Bharadwajetal2015}, who are able to estimate
+the heterogeneous returns to birth weight over the entire labour market
+portion of the life cycle. Although these estimates are based on Swedish
+rather than US data, they provide a rate of return, and they are the only
+estimates of which we are aware that allow for temporal variations
+in returns.\footnote{What's more, at least on average, the estimates
+  from \citet{Bharadwajetal2015} are largely in agreement with the
+  other (static) values outlined in table \ref{litrev}.}
+
+These calculations also allow us to take account of the fact that
+the estimated returns to birth weight are different for boys and
+girls.  This is discussed extensively by \citet{RosenzweigZhang2013}
+who offer a ``skill versus brawn'' explanation of the effects of
+additional \emph{in-utero} nutrition on returns to human capital,
+suggesting that educational returns of birth weight are larger for
+girls, and labour market returns of birth weight are larger for boys.
+In our experimental data, we do observe a differential WTP for birth weight
+when the experimental profile is a boy versus when it is a girl. In
+table \ref{WTPgend} we estimate a slightly higher willingness to pay
+for birth weight in boy children (\$1.47 per gram versus \$1.40 per gram).
+Although this difference is not statistically distinguishable at typical
+levels, in examining non-parametric categories of birth weight, we
+observe that the WTP distribution for all weights of boys dominates
+the same distribution for all weights of girls (see columns 2 and 4,
+and appendix figure \ref{graphGend}).
+
+In table \ref{boeBW} we calculate the present value of a gram of
+birth weight separately for each gender using prevailing US wage
+rates, labour market participation\footnote{In the sense that parents
+  form expectations over future labour market outcomes using current
+  conditions, these values will capture the most complete set of
+  information available at the survey date.}, and the labour market
+returns to birth weight estimated by \citet{Bharadwajetal2015}.  This
+consists of discounting to present day the full expected income
+flows for a median individual who enters the labour market at 25 years
+of age, and works up until the age of 60.  In this case, even when
+considering life cycle variations in labour market conditions and the
+effect of birth weight, we still find that the returns to birth weight
+exceed parental willingness to pay.  For girls, the crude estimate of
+the return to an additional 250 grams of weight is \$1476.08, or
+approximately \$6 per gram, and for boys these values are \$1981.30,
+and \$8 per gram respectively.  These values, while closer to our
+estimates of WTP, still are approximately 4-5 times that experimentally
+elicited values.
+
+
+%Talk about Royer as an additional test (looking at average income in area)
+
+\section{Conclusion}
+\label{scn:conclusion}
+
+\newpage
+\noindent\textbf{Notes}: This experiment documented in this paper has passed ethical approval at the Oxford Centre of Experimental Social Sciences (CESS), and been registered as project ETH-160128161.
+
+\bibliography{./refs}
+
+\clearpage
+\end{spacing}
+\section*{Figures and Tables}
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Geographic Coverage of Respondents}
+    \label{geography}
+  \includegraphics[scale=0.9]{../results/DCE/Summary/surveyCoverage.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} The full survey sample consists of 1,002 respondents.  The final estimation sample consists of 952 respondents given that it removes respondents whose geographic IP suggested a non-US location (36 respondents, 3.6\%), those who failed to respond that their educational attainment was identical at the beginning and end of the survey (8 respondents, 0.8\%), and those who completed the discrete choice experiment in under two minutes (6 respondents, 0.6\%).}
+\end{figure}
+
+\begin{table}[htpb!]
+  \begin{center}
+    \caption{Summary Statistics of Experimental Respondents}
+    \label{sumstats}
+    \begin{tabular}{lccccc} \toprule
+    \input{./../results/DCE/Summary/MTurkSum-clean.tex}
+    \bottomrule
+    \multicolumn{6}{p{11.4cm}}{{\footnotesize\textsc{Notes:} Refer to figure \ref{geography} for a discussion of the experimental sample. Years of education, total income and hourly MTurk earnings are calculated from categorical variables.}}
+  \end{tabular} 
+  \end{center}
+\end{table}
+
+\clearpage
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Discrete Choice Experimental Results (Main Sample)}
+    \label{DCE-samp}
+  \includegraphics[scale=0.9]{../results/DCE/Figures/Conjoint_Sample_continuous.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Point estimates and confidence intervals are displayed of the change in likelihood of choosing a birth profile given that a particular characteristic was seen.  Each characteristic is compared to the omitted base case indicated on the zero line.  Each respondent observes 7 comparison activities, resulting in 14 profiles per respondent.  95\% intervals are clustered by respondent, and costs are displayed as a linear coefficient.  Fully non-parametric costs are displayed in appendix figure \ref{DCE-full-samp}.}
+\end{figure}
+
+\input{./../results/DCE/Regressions/conjointWTP.tex}
+
+\begin{landscape}
+\input{./../results/DCE/Regressions/conjointGroups.tex}
+\end{landscape}
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Relative Willingness to Pay for Birth Weight}
+    \label{WTP-relative}
+  \includegraphics[scale=0.74]{../results/DCE/Figures/WTP_relative.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Each point and confidence interval are with respects to the baseline (omitted) category of 2,500 grams, the minimum displayed birth weight.  Willingness to pay is determined as the ratio between the particular birth weight and out of pocket costs estimated as average marginal effects in a logit regression.  95\% confidence intervals displayed are calculated using the delta method.}
+\end{figure}
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Marginal Willingness to Pay for Birth Weight}
+    \label{WTP-marginal}
+  \includegraphics[scale=0.74]{../results/DCE/Figures/WTP_marginal.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Each point and confidence interval compare the willingness to pay for a particular birth weight compared to the preceding birth weight.  Willingness to pay is determined as the ratio between the particular birth weight and out of pocket costs estimated as average marginal effects in a logit regression. 95\% confidence intervals displayed are calculated using the delta method.}
+\end{figure}
+
+\begin{landscape}
+  \begin{longtable}{p{5.5cm}p{2.2cm}p{2cm}p{2cm}p{2.7cm}p{2cm}p{3.4cm}}
+    \caption{Estimates of the Labour Market Returns to Birth Weight} \label{litrev} \\
+    \toprule
+    Authors&Weight&Geographic&Time  &Estimated&Denominator&Estimation \\
+           &Range &Area      &Period&Return   &           &Strategy   \\ 
+    \midrule
+    \endfirsthead
+
+    \multicolumn{7}{c}{ \tablename\ \thetable{} -- continued from previous page} \\
+    \midrule
+    Authors&Weight&Geographic&Time  &Estimated&Denominator&Estimation \\
+           &Range &Area      &Period&Return   &           &Strategy   \\ 
+    \midrule
+    \endhead
+    \midrule\multicolumn{7}{r}{{\textbf{Continued on next page}}} \\
+    \multicolumn{7}{p{22cm}}{\begin{footnotesize}$^{a}$ No wage results, years of completed education used. $^{b}$ Labour market participation indicator. $^{c}$ Earnings expressed as natural logarithm. $^{d}$ Standard error is calculated based on $t$-statistic reported in original paper. $^{e}$ Binary indicator for timely graduation from high school.  Results by birth weight groups are presented with respects to $>$3,500g. \end{footnotesize} } \\ \midrule
+    \endfoot
+    \midrule\multicolumn{7}{p{22cm}}{\begin{footnotesize}$^{a}$ No wage results, years of completed education used. $^{b}$ Labour market participation indicator. $^{c}$ Earnings expressed as natural logarithm. $^{d}$ Standard error is calculated based on $t$-statistic reported in original paper. $^{e}$ Binary indicator for timely graduation from high school.  Results by birth weight groups are presented with respects to $>$3,500g. \end{footnotesize} } \\    \bottomrule
+    \endlastfoot
+
+    \multicolumn{7}{l}{\textbf{Panel A: Labour Market}} \\
+    \citet{BehrmanRosenzweig2004} &$\mu=90.2$oz ($\mu=2,557$)&Minnesota&1936-1955&0.190(0.077)$^{c,d}$&oz/week pregnancy&Between MZ twin\\
+    \citet{Blacketal2007} &$\mu=2,598$&Norway&1967-1977&0.12(0.06)&ln(Birth Weight)&Between twins\\
+    \citet{Bharadwajetal2015} &$\mu=2,641$ M $\mu=2,549$ F&Sweden&1926-1958&0.0893(0.0394)&ln(Birth Weight)&Between twins\\
+    \citet{RosenzweigZhang2013}&$\mu=2,540$ M $\mu=2,430$ F&China&1973-1984&0.195(0.079)$^{d}$ M 0.054(0.104)$^{d}$ F&1,000g&Between twins\\
+    \citet{CookFletcher2015} & $\mu=3,367$&Wisconsin&1957 HS graduates&0.0997(0.0788)&Birth Weight (1 sd)&Between siblings\\
+    \citet{CurrieHyson1999} &Pr(LBW)= 0.045-0.088&Great Britain & March 1958 &-0.017(0.029) M -0.035(0.029) F& LBW&Observable controls\\
+    \citet{Caseetal2005} &Pr(LBW) =0.073 & Great Britain & March 1958 & -0.037(0.021)$^{b}$& LBW & Observable controls \\
+    \citet{JohnsonSchoeni2011} &NA&USA (PSID)&1951-1975&-0.1667(0.097)$^{c}$&LBW&Between siblings (males only) \\
+    \multicolumn{7}{l}{\textbf{Panel B: Completed Education}}\\
+    \citet{Royer2009}&$\mu=2,533$&California&1960-1982&0.16(0.07)$^{a}$ &1,000g (3500-2500g)&Between twins (females only)\\
+    \citet{Oreopoulosetal2008} &$\mu=2,517$&Manitoba&1979-1985&0.069(0.061)$^{e}$&1,000g&Between twins\\
+    \citet{CurrieMoretti2007} &$\mu=3,268$&California&1970-1974&-0.079(0.014)$^{a}$&LBW& Between siblings (females only)\\
+    \citet{ConleyBennet2000} &Pr(LBW) =0.07&USA (PSID)&1968-1973&-2.024(0.764)$^{e}$&LBW&Between siblings\\
+  \end{longtable}
+\end{landscape}
+%Royer: <2,500g: -0.02 education effect.  2,500g +: 0.33 effect. 
+%NOTE: Royer 2009 and Currie Moretti: could use income of zip code.
+%NOTE; Johnson Schoeni estimate $4819 per year with Tobit model.
+%reaching grade 12 by 17 years
+
+\input{./../results/DCE/Regressions/conjoint-gendInd.tex}
+
+\begin{table}
+  \caption{Back-of-the-Envelope Calculation of the Discounted Value of Birth Weight}
+  \label{boeBW}
+  \begin{tabular}{lccccc}
+    \toprule
+    Age & $\frac{\partial wage}{\partial 250g}$ & Median Salary & Present Value & Participation Rate & PV$\times$ Particip \\ \midrule
+    \multicolumn{6}{l}{\textsc{Panel A: Females}} \\
+    25-30 & 2.11\% & \$27,473  & \$741.13 &73.8&\$546.95 \\
+    30-35 & 1.80\% & \$30,317  & \$546.66 &73.8&\$403.43 \\
+    35-40 & 0.76\% & \$31,580  & \$188.38 &74.1&\$139.59 \\
+    40-45 & 0.03\% & \$31,667  & \$5.84   &74.1&\$4.33   \\
+    45-50 & 1.31\% & \$31,810  & \$200.80 &73.8&\$148.18 \\
+    50-55 & 1.63\% & \$31,880  & \$196.19 &73.8&\$144.79 \\
+    55-60 & 1.52\% & \$30,183  & \$135.72 &58.8&\$79.80  \\ \midrule
+    TOTAL &        &           & \$2014.75 &     &\$1476.08\\ \midrule
+    \multicolumn{6}{l}{\textsc{Panel B: Males}} \\
+    25-30 & 1.25\% & \$34,328 & \$548.61 &  88.7 & \$486.61 \\
+    30-35 & 1.23\% & \$41,720  & \$514.05 & 88.7& \$455.96 \\
+    35-40 & 1.07\% & \$48,007  & \$403.18 & 90.5& \$364.88 \\
+    40-45 & 1.01\% & \$50,711  & \$314.98 & 90.5& \$285.06 \\
+    45-50 & 0.99\% & \$51,021  & \$243.39 & 85.6& \$208.34 \\
+    50-55 & 0.61\% & \$51,110  & \$117.71 & 85.6& \$100.76 \\
+    55-60 & 0.70\% & \$50,104  & \$103.75 & 76.8& \$79.68  \\ \midrule 
+    TOTAL &        &           & \$2245.67 &     &\$1981.30 \\ \bottomrule
+    \multicolumn{6}{p{14.6cm}}{{\footnotesize \textsc{Notes}:  All estimates
+        in column 2 are provided by \citet{Bharadwajetal2015} (refer to their
+        table 4), and are per additional 250 grams of birth weight. Median
+        salary figures are provided by the \citet{USCB2016},
+        and labour participation rates are provided by the \citet{BLS2017}. All
+        present values are calculated as a deferred annuity, assuming that
+        the child will reach the labour market in 25 years, and a discount
+    rate of 5\%.}}
+  \end{tabular}
+\end{table}
+
+%%% MALES: median 37,138               PV      Participation Rate
+% 25-30 -- 250 grams = +1.25\% 34,328  548.607 88.7
+% 30-35 -- 250 grams = +1.23\% 41,720  514.051 88.7
+% 35-40 -- 250 grams = +1.07\% 48,007  403.179 90.5
+% 40-45 -- 250 grams = +1.01\% 50,711  314.983 90.5
+% 45-50 -- 250 grams = +0.99\% 51,021  243.389 85.6
+% 50-55 -- 250 grams = +0.61\% 51,110  117.708 85.6
+% 55-60 -- 250 grams = +0.70\% 50,104  103.752 76.8
+%TOTAL = 2245.67
+%TOTAL WITH PARTICIPATION = 1981.295
+
+% FEMALES: median 23,769               PV
+% 25-30 -- 250 grams = +2.11\% 27,473  741.125 73.8
+% 30-35 -- 250 grams = +1.80\% 30,317  546.657 73.8
+% 35-40 -- 250 grams = +0.76\% 31,580  188.380 74.1
+% 40-45 -- 250 grams = +0.03\% 31,667  5.842   74.1
+% 45-50 -- 250 grams = +1.31\% 31,810  200.795 73.8 
+% 50-55 -- 250 grams = +1.63\% 31,880  196.190 73.8 
+% 55-60 -- 250 grams = +1.52\% 30,183  135.716 58.8
+%TOTAL = 2014.75
+%TOTAL WITH PARTICIPATION = 1476.078
+
+
+\clearpage
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+
+\appendix
+\section{Appendix Figures and Tables}
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Birth Weight from Administrative Data}
+    \label{bwt-nvss}
+  \includegraphics[scale=0.9]{../results/births/birthweight.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Full birth weight distribution from all US births occurring in 2013 observed from birth certificate data (values below 500 grams or above 5000 grams are removed for display purposes). 84.09\% of all births fall in the ``normal'' birth range of 2500 to 4000g.  Of non-normal birth weights, 8.02\% are low birth weight ($<$ 2,500 grams), and the remaining 7.89\% were large ($>$ 4,000 grams).}
+\end{figure}
+
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Discrete Choice Experimental Results with Categorical Costs (Main Sample)}
+    \label{DCE-full-samp}
+  \includegraphics[scale=0.9]{../results/DCE/Figures/Conjoint_Sample.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Refer to note to figure \ref{DCE-samp}.  This figure is based
+    on an identical sample, however now using categorical rather than a linear measure of
+    costs.}
+\end{figure}
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Discrete Choice Experimental Results (Full Sample)}
+    \label{DCE-sampFull}
+  \includegraphics[scale=0.9]{../results/DCE/Figures/Conjoint_All_continuous.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Refer to notes to figure \ref{DCE-samp}.  This figure is
+    identical, however now also including the $\sim 5\%$ removed for failing consistency
+    checks.}
+\end{figure}
+
+
+%\begin{figure}[htpb!]
+%  \begin{center}
+%    \caption{Discrete Choice Experimental Results with Categorical Costs (Full Sample)}
+%    \label{DCE-full-all}
+%  \includegraphics[scale=0.9]{../results/DCE/Figures/Conjoint_All.eps}
+%  \end{center}
+%  \floatfoot{\textsc{Notes:} }
+%\end{figure}
+
+\input{./../results/DCE/Regressions/conjointGroups-wts.tex}
+
+
+
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Discrete Choice Experiment Framing}
+    \label{DCE-frame}
+  \includegraphics[scale=0.7]{surveyQs/Q1.png}
+  \end{center}
+  %\floatfoot{\textsc{Notes:} }
+\end{figure}
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Discrete Choice Experiment Options}
+    \label{DCE-options}
+  \includegraphics[scale=0.7]{surveyQs/Q2.png}
+  \end{center}
+  %\floatfoot{\textsc{Notes:} }
+\end{figure}
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Discrete Choice Experiment Example}
+    \label{DCE-example}
+  \includegraphics[scale=0.7]{surveyQs/Q3.png}
+  \end{center}
+  %\floatfoot{\textsc{Notes:} }
+\end{figure}
+
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Examining the Necessity for Round Fixed Effects}
+    \label{DCE-asm2}
+  \includegraphics[scale=0.81]{../results/DCE/Figures/roundOrder.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Each estimate and confidence interval refers to
+    the estimated likelihood of choosing a particular profile given an increase
+    in birth weight by the round order of the experiment. All confidence intervals
+    are clustered by respondent.}
+\end{figure}
+
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Examining the Necessity for Position Order Fixed Effects}
+    \label{DCE-asm3}
+  \includegraphics[scale=0.81]{../results/DCE/Figures/attributeOrder.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Each estimate and confidence interval refers to
+    the estimated likelihood of choosing a particular profile given an increase
+    in birth weight by the position of birth order in the list of characteristics
+    in the profile (refer to figure \ref{DCE-example} for an example where
+    birth weight is located in position 3). All confidence intervals are
+    clustered by respondent.}
+\end{figure}
+
+\begin{landscape}
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Mechanical Turk Front Page}
+    \label{MTurkAdd}
+  \includegraphics[scale=0.65]{surveyQs/MTurkScreen.png}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Respondents first see the survey front page on MTurk before being redirected to the survey located Qualtrics (as displayed in figures \ref{DCE-frame}, \ref{DCE-options} and \ref{DCE-example}). A description of the process followed by respondents is provided in appendix \ref{app:procedure}.}
+\end{figure}
+\end{landscape}
+
+\begin{table}
+  \caption{Comparison of Confidence Intervals for WTP from Delta Method and Block Bootstrap}
+  \label{bootstrapCI}
+  \begin{tabular}{lcccc} \toprule
+    Estimation & WTP Point & Delta Method & Block Bootstrap & Full \\
+    Sample     &  Estimate & 95\% CI      & 95\% CI         & Results \\ \midrule
+    Main Sample&  \$1438.3 & [\$1119.4;\$1757.1] & [\$1107.2;\$1769.3] & Table \ref{WTPreg} \\
+    Parents    &  \$1718.4 & [\$1232.4;\$2204.4] & [\$1233.9;\$2202.8] & Table \ref{WTPgreg} \\
+    Non-Parents&  \$1172.4 & [\$753.0;\$1591.8]  & [\$757.5;\$1587.3]  & Table \ref{WTPgreg} \\
+    Women      &  \$1275.7 & [\$856.4;\$1695.0]  & [\$864.9;\$1686.6]  & Table \ref{WTPgreg} \\
+    Men        &  \$1663.8 & [\$1173.7;\$2153.8] & [\$1173.3;\$2154.2] & Table \ref{WTPgreg} \\
+   Girl Profile&  \$1398.3 & [\$974.6;\$1821.9]  & [\$947.8;\$1848.7]  & Table \ref{WTPgend} \\
+    Boy Profile&  \$1476.7 & [\$1073.1;\$1880.3] & [\$1059.7;\$1893.7] & Table \ref{WTPgend} \\
+    \midrule
+    \multicolumn{5}{p{13.6cm}}{{\footnotesize \textsc{Notes}: WTP point estimates
+        are all calculated as the ratio of the coefficient on birth weight (in
+        1000s of grams) to the coefficient on costs in dollars. The delta method
+        for the 95\% confidence interval is displayed in tables throughout the
+        paper and is calculated from directly from regression coefficients and
+        the maximum likelihood function, while the block bootstrap confidence
+        interval is based on re-sampling with replacement over survey respondents
+        (not over individual profiles) in order to maintain the correct dependence
+        structure within survey respondents.  In all cases, 1,000 bootstrap
+        samples are performed, and the 95\% confidence interval is taken using the
+        WTP in each of these 1,000 replications. Additional discussion of the
+    relative merits of each method is available in \citet{Hole2007}.}}
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begingroup
+\setlength{\LTleft}{-20cm plus -1fill}
+\setlength{\LTright}{\LTleft}
+\begin{longtable}{lccc} 
+  \caption{Geographical Coverage} \label{tab:cover} \\
+  \hline
+  State Name & Percent & Percent & Difference \\
+             & MTurk      & Census Bureau & (\%)          \\ \hline \endhead
+  \input{./../results/DCE/Summary/GeographicCoverage.tex}
+  \hline 
+  \multicolumn{4}{p{10.4cm}}{{\footnotesize\textsc{Notes:} Columns present the percent of respondents from the MTurk sample, the percent of residents according to US Census Bureau records (2015), and the difference between the percent of MTurk respondents and residents.}}
+\end{longtable}
+\endgroup
+
+\begin{landscape}
+\begin{figure}[htpb!]
+  \begin{center}
+    \caption{Willingness to Pay by Gender of Index Child}
+    \label{graphGend}
+  \includegraphics[scale=1.4]{../results/DCE/Figures/WTP_relative_gends.eps}
+  \end{center}
+  \floatfoot{\textsc{Notes:} Thick lines present point estimates of the marginal WTP for birth weight for each gender (based on the minimum value of 2,500 grams for each gender).  95\% confidence intervals for each WTP are based on the delta method, and allow for arbitrary correlation of choices within each survey respondent.}
+\end{figure}
+\end{landscape}
+
+
+
+
+\section{Survey Response Procedure}
+\label{app:procedure}
+Below we describe the survey response procedure as seen by survey respondents.
+\begin{enumerate}
+\item All respondents meeting survey criteria ($>95\%$ approval rating, $>100$ completed MTurk tasks, US based, and non-participants in the pilot) were able to see the Mechanical Turk HIT with the title ``Link to Survey'' along with the description displayed in appendix figure \ref{MTurkAdd}. Respondents are instructed that payment is conditional upon completing the survey and providing a randomized code which is displayed at the end of the survey.
+\item Respondents accept participation and are directed to the discrete choice experiment on the Qualtrics survey platform.
+\item Respondents must complete each question in order to move forward, and after completing the survey the randomized code is displayed.
+\item Respondents return to the MTurk front page, enter their unique completed survey code and receive payment.
+\end{enumerate}
+
+
+\end{document}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+SOME REFS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\citet{Royer2009}: ``Consistent with previous studies, I estimate a statistically significant relationship
+between birth weight and long-run and intergenerational outcomes. In particular,
+the heavier twin obtains more education, gives birth to heavier children, and has
+fewer pregnancy complications. In sharp contrast to earlier research, however, these
+effects tend to be quite small with the exception of pregnancy complications. For a
+200 gram increase in birth weight, which likely is an achievable policy manipula-
+tion, education would be projected to rise by roughly 0.04 of one year. These nega-
+tive effects of birth weight do not appear to be persistent across generations, as the
+estimated intergenerational correlation in birth weight is only 0.07. In contrast to
+other studies (e.g., Black, Devereux, and Salvanes 2007), .''
+
+\citet{BehrmanRosenzweig2004}: ``Our estimates provide a number of clear results. First,
+they indicate that increasing fetal growth has a significant positive effect on schooling
+attainment that is underestimated by 50\% if there is no control for genetic and family
+background endowments as in cross-sectional estimates.
+Second, our estimates indicate that intrauterine nutrient
+consumption does not have any persistent effects on adult
+BMI---increasing birth weight is not a cause of adult obesity.
+Third, our results indicate that the heritable component of
+birth weight plays the dominant role in the intergenerational
+correlation of birth weights. Fourth, the estimates indicate
+that intrauterine nutrient intake significantly affects adult
+height, consistent with the literature that makes use of
+height statistics to gauge childhood nutritional investments
+over time and across countries. Fifth, although we
+find evidence that augmenting birth weight, particularly
+among lower-birth weight babies, would have significant
+labor-market payoffs, we show that the strong cross-country
+correlation between incomes and birth weight substantially
+overstates the reduction in world earnings inequality that
+would arise from reducing cross-country disparities in birth-weights.''
+
+Finally, the within-MZ point estimate of the reduced-
+form effect of fetal growth on wages indicates that augment-
+ing a child's birth weight by a 1 lb. increases her adult
+earnings by over 7\%. That increasing fetal growth and
+birth weight increases earnings is not surprising given the
+estimates suggesting that increasing birth weight increases
+schooling.
+
+\citet{Blacketal2007}: ``We find that birth weight does matter. Consistent with earlier
+work, we find that twin fixed effects estimates of the effect of birth weight on
+short-run outcomes such as one-year infant mortality are much smaller than their
+cross-sectional equivalents. However, studying only short-run outcomes may lead to
+incorrect inferences about the longer-run effects of birth weight; we find
+that birth weight has a significant effect on longer-run outcomes
+such as height, IQ at age 18, earnings, and education,
+and the fixed effects estimates are similar in size to cross-sectional ones.''
+
+FOOTNOTE 13 (p.\ 416) It is interesting to note that the LBW indicator fits
+most poorly for all outcomes. This suggests
+that using cutoffs such as $<$2,500
+grams as the variable of interest may not be appropriate for this type of
+analysis. We have also tried an indicator for LBW ($<$2,500) in the
+same specifications.  The continuous measure dominates
+for all outcomes and the effect of LBW is always statistically
+insignificant and often has the wrong sign. In
+the same vein, we have also tried including both ln(birth weight)
+and birth length; with the exception of 
+of height at age eighteen, birth length is always dominated
+by ln(birth weight).
+
+
+
+\citet{Oreopoulosetal2008}: ``We find evidence of longer-term
+consequences of infant health both across families, within siblings, and
+within twin pairs, although different measures of infant health predict outcomes
+differently. The
+results suggest strong effects of infant health on death between ages one and 17,
+grade completion, and months on social assistance after age 18, even for ranges
+not considered overtly concerning (for example, birth weights between 2,500 and
+3,500 grams and Apgar scores of seven or eight)''
+
+\citet{Figlioetal2014} We make use of a new data resource -- merged birth and school records for all children born in Florida from 1992 to 2002 -- to study the relationship between birth weight and cognitive development. Using singletons as well as twin and sibling fixed effects models, we find that the effects of early health on cognitive development are essentially constant through the school career; that these effects are similar across a wide range of family backgrounds; and that they are invariant to measures of school quality. We conclude that the effects of early health on adult outcomes are therefore set very early. 
+
+\citet{ConleyBennet2000}: ``The results, presented in Table 2, indicate
+that low birth weight negatively affects educational progress, even
+after factoring out family-specific conditions.''
+
+\citet{Bharadwajetal2015} In line with Black, Devereux, and Salvanes (2007)
+and others who have examined the relationship between birth weight
+and income in early adulthood, we find birth weight to have
+a positive and statistically significant effect on income. We find positive
+effects on both permanent income as well as on income over large
+parts of the life cycle. After age 50, however, the effect seems
+to fade out. Interestingly, we find that the impact of birth weight on income
+has remained rather constant across cohorts born
+almost 50 years apart.
+
+\citet{CookFletcher2015} For Panel B, we estimate our proposed interaction
+model, replacing IQ with wages later in life. The estimated associations of
+neuroplasticity, birth weight, and the interaction between the two
+variables, however, are similar to the regressions with IQ. Birth
+weight has a positive and statistically significant association with
+the wage rate, but the magnitude of this effect is dependent upon
+our measure for neuroplasticity. When considering the sibling fixed
+effects estimation of column (3), a 10\% increase in birth weight is
+associated with roughly a 15\% increase in wage for the least plastic
+individuals. For the median, neuroplasticity score, a 10\% increase
+in birth weight is associated with roughly a 5\% increase in wage.
+And for the maximum neuroplasticity score, a 10\% increase in birth
+weight is negatively associated with wage. As with IQ, neuroplasticity
+moderates the associations between birth weight and later life outcomes
+
+\citet{Fletcher2011}: not wages.
+
+OTHER METHODS
+The first involves exploiting historical events (e.g., the 1944 Dutch famine
+(Lumey and Stein 1997) and the 1918 influenza epidemic (Almond 2006)), which
+altered the in utero environment through starvation, stress, and/or sickness.
+
+and Phil Oreopoulos et al. 2006.
+
+
+\citet{JohnsonSchoeni2011}
+models of cognition, childhood health, education, and health, earnings,
+and wages in adulthood we obtain a much more compelling understanding of the
+long-run effects of early life events. Indeed, our findings on the effects of early-
+life events using the national PSID sample are remarkably consistent with a small
+but growing set of very recent studies by economists (Black, Devereux, and Salvanes,
+2007; Oreopoulos et al., 2008;
+Almond and Mazumder, 2005; Almond and Chay, 2006).
+
+\citet{CurrieMoretti2007}
+Low birth weight has been used as the leading indicator of poor health
+among  newborns for many years.  In 1996,  the infant mortality rate for
+babies over 2,500 grams was 2.77 compared to 17.45 for babies between
+1,500 and 2,500 grams, and 259.35 for babies less than 1,500 grams (Conley
+and Bennett 2001). Follow ups indicate that low birth weight babies have
+lower scores on a variety of tests of intellectual and social development
+(Breslau et al. 1994; Brooks-Gunn, Klebanov, and Duncan 1996). \textbf{Currie
+and  Hyson  (1996)}  find  that  low  birth  weight  was  predictive  of  lower
+schooling attainments, earnings, and employment probabilities as of age
+33,  regardless  of  the  parents'  socioeconomic  status.
+
+\citet{CurrieHyson1999}
+
+
+
+ADD DCC:
+
+Discuss why we do not use papers such as \citet{Almond2006} (no direct
+estimates of returns to birth weight).  Also do not use papers like
+\citet{Figlioetal2014} and others from their footnote 1 as they are
+too short term.
+
+Almond, Chay, and Lee (2005) and Conley, Strully, and Bennett (2003)
+on neonatal outcomes and hospital costs
+Torche and Echevarria (2011) on fourth-grade mathematics test scores.
+Bharadwaj, Eberhard, and Neilson (2013), in a current working paper,
+study fourth-grade test scores and grades in school (also in Chile)
+
