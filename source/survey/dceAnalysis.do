@@ -88,6 +88,17 @@ replace ftotinc = 95000  if RespSalary=="$90,000 - $99,999"
 replace ftotinc = 125000 if RespSalary=="$100,000 - $149,999"
 replace ftotinc = 175000 if RespSalary=="$150,000 or more"
 replace ftotinc = ftotinc/1000
+
+gen nonparentPlans = RespPlansKids=="Yes"|RespPregnant=="Yes" if parent!=1
+
+sum ftotinc if parent==1
+sum ftotinc if parent==0
+sum ftotinc if nonparentPlans==1
+sum ftotinc if nonparentPlans==0
+*parent==0&RespPlansKids=="No"
+
+
+
 gen mturkSal = 1.5 if RespMTurkSalary=="Less than $2"
 replace mturkSal = 2.5 if RespMTurkSalary=="$2-$2.99"
 replace mturkSal = 3.5 if RespMTurkSalary=="$3-$3.99"
@@ -117,11 +128,11 @@ lab var highEduc  "Some College +"
 lab var parent    "Parent"
 lab var ftotinc   "Total Family Income (1000s)"
 lab var mturkSal  "Hourly earnings on MTurk"
-
+lab var nonparentPlans "Non-Parent Planning Children"
 
 #delimit ;
-estpost sum sex age hispanic black white hispanic married highEduc educY
-employed ftotinc parent nchild mturkSal;
+estpost sum sex age black white hispanic parent nonparentPlans nchild married
+employed highEduc educY ftotinc mturkSal;
 estout using "$OUT/Summary/MTurkSum.tex", replace label style(tex)
 cells("count(label(N)) mean(fmt(2) label(Mean)) sd(fmt(2) label(Std.\ Dev.))
 min(fmt(2) label(Min)) max(fmt(2) label(Max))");
@@ -200,6 +211,7 @@ gen certainty     = "1"  if RespSure=="1 (not sure at all)"
 replace certainty = "10" if RespSure=="10 (definitely sure)"
 replace certainty = RespSure if certainty==""
 destring certainty, replace
+gen nonparentPlans = RespPlansKids=="Yes"|RespPregnant=="Yes" if parent!=1
 
 tab gender     , gen(_gend)
 tab cost       , gen(_cost)
@@ -284,8 +296,8 @@ local base age>=25&age<=45&married==1&white==1
 bys ID: gen N=_n
 
 #delimit ;
-local conds all==1 mainSample==1;
-local names All Sample;
+local conds all==1 mainSample==1 parent==1 parent==0 nonparentP==1 nonparentP==0;
+local names All Sample parent nonparent nonparentPlan nonparentNotPlan;
 tokenize `names';
 lab def names -1 "Birth Weight" -2 "5lbs, 8oz" -3 "5lbs, 13oz" -4 "6lbs, 3oz"
               -5 "6lbs, 8oz" -6 "6lbs, 13oz" -7 "7lbs, 3oz" -8 "7lbs, 8oz"
@@ -306,7 +318,14 @@ lab def namesT -1 "Birth Weight" -2 "5lbs, 8oz" -3 "5lbs, 13oz"
 
 local tvL = 1.96
 local ll=1
+local jj=0
 foreach c of local conds {
+    local ++jj
+    if `jj'==3 local title title("Parents", box bexpand size(medium))
+    if `jj'==4 local title title("Non-Parents", box bexpand size(medium))
+    if `jj'==5 local title title("Non-Parents (Planning Kids)", box bexpand size(medium))
+    if `jj'==6 local title title("Non-Parents (Not Planning)", box bexpand size(medium))
+    if `jj'>1 local c `c'&mainSample==1
     reg chosen `oFEs' _sob* _cost* _gend* _bwt* if `c', cluster(ID)
     local Nobs = e(N)
 
@@ -352,7 +371,8 @@ foreach c of local conds {
     xline(0, lpattern(dash) lcolor(gs7)) ylabel(-1 -14 -20 -32, valuelabel angle(0))
     ymlabel(-2(-1)-12 -15(-1)-18 -21(-1)-30 -33(-1)-34, valuelabel angle(0))
     ytitle("") xtitle("Effect Size (Probability)") legend(off) ysize(8)
-    note(Total respondents = `=`Nobs'/14'.  Total profiles = `Nobs'.);
+    note(Total respondents = `=`Nobs'/14'.  Total profiles = `Nobs'.)
+    saving("$OUT/Figures/cg_`1'", replace) `title';
     *legend(lab(1 "95% CI") lab(2 "Point Estimate"));
     #delimit cr
     graph export "$OUT/Figures/Conjoint_`1'.eps", replace
@@ -399,10 +419,11 @@ foreach c of local conds {
     twoway rcap  LB UB Y in 1/26, horizontal scheme(s1mono) lcolor(black) ||
     scatter Y Est in 1/26, mcolor(black) msymbol(oh) mlwidth(thin)
     xline(0, lpattern(dash) lcolor(gs7))
-    ylabel(-1 -14 -20 -23, valuelabel angle(0))
+    ylabel(-1 -14 -20 -23, valuelabel angle(0)) xlabel(-0.1(0.1)0.3)
     ymlabel(-2(-1)-12 -15(-1)-18 -21 -24 -25, valuelabel angle(0))
     ytitle("") xtitle("Effect Size (Probability)") legend(off) ysize(7)
-    note(Total respondents = `=`Nobs'/14'.  Total profiles = `Nobs'.);
+    note("Total respondents = `=`Nobs'/14'.  Total profiles = `Nobs'.")
+    saving("$OUT/Figures/cg_`1'_cont", replace) `title';
     *legend(lab(1 "95% CI") lab(2 "Point Estimate"));
     #delimit cr
     graph export "$OUT/Figures/Conjoint_`1'_continuous.eps", replace
@@ -411,6 +432,13 @@ foreach c of local conds {
     macro shift
     local ++ll
 }
+
+#delimit ;
+graph combine "$OUT/Figures/cg_parent_cont" "$OUT/Figures/cg_nonparent_cont"
+"$OUT/Figures/cg_nonparentPlan_cont" "$OUT/Figures/cg_nonparentNotPlan_cont",
+scheme(s1mono) rows(1) xcommon xsize(11);
+graph export "$OUT/Figures/parentalSubsets.eps", replace;
+#delimit cr
 
 *-------------------------------------------------------------------------------
 *--- (5) Regressions and willingness to pay
@@ -479,9 +507,29 @@ postfoot("\bottomrule           "
 #delimit cr
 estimates clear
 
+*gen nonparentPlans = RespPlansKids=="Yes"|RespPregnant=="Yes" if parent!=1
+gen planner = RespPlansKids=="Yes"|(RespPregnant=="Yes"&parent==0)
+foreach c in nonparentPlans==1 nonparentPlans==0 {
+    local vars bwtGrams costNumerical `ctrl' 
+    qui logit chosen `vars' if mainSample==1&`c', cluster(ID)
+    qui margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4 _gend2) post
+    
+
+    local wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+    qui nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+    local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+    local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+
+    dis "WTP is `wtp', [`lb'; `ub']" 
+}
+
+
+*-------------------------------------------------------------------------------
+*--- (5a) By Parent/non-parent
+*-------------------------------------------------------------------------------
 gen All = 1
 local m = 1
-foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+foreach c in All==1 parent==1 parent==0 nonparentP==1 nonparentP==0 {
     local vars bwtGrams costNumerical `ctrl' 
     eststo: logit chosen `vars' if mainSample==1&`c', cluster(ID)
     margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4 _gend2) post
@@ -500,9 +548,9 @@ cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
                                             "95\% CI" Observations))
 starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
-mgroups("All" "Parent" "Gender", pattern(1 1 0 1 0)
+mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
-mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
+mlabels(" " "Yes" "No" "Planning" "Not Planning") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPgreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
@@ -514,14 +562,16 @@ postfoot("\bottomrule           "
          "to the probability of choosing a particular birth weight. The 95\% "
          "confidence interval is calculated using the delta method for the   "
          "ratio. Identical regressions with a continuous measure of          "
-         "birth weight are provided in table \ref{WTPgregc}.                 "
+         "birth weight are provided in Table \ref{WTPgregc}. Planning and    "
+         "Not Planning in columns 4 and 5 refer to decisions regarding       "
+         "future children as outlined in Table \ref{sumstats}."
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
 
 
 local m = 1
-foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+foreach c in All==1 parent==1 parent==0 nonparentP==1 nonparentP==0 {
     local vars costNumerical `bwts' `ctrl' 
     eststo: logit chosen `vars' if mainSample==1&`c', cluster(ID)
     margins, dydx(`bwts' costNumerical _sob2 _sob3 _sob4 _gend2) post
@@ -534,9 +584,9 @@ esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGroups-wts.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (N, fmt(%9.0g) label(Observations))
 starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
-mgroups("All" "Parent" "Gender", pattern(1 1 0 1 0)
+mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
-mlabels(" " "Yes" "No" "Woman" "Man") booktabs label
+mlabels(" " "Yes" "No" "Planning" "Not-Planning") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPgregc}) 
 keep(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
@@ -549,12 +599,174 @@ postfoot("\bottomrule           "
          "confidence interval is calculated using the delta method for the   "
          "ratio.  No WTP figures are displayed in the table footer as each   "
          "birth weight category is associated with its own WTP. These values "
-         "are all displayed in figure \ref{WTP-marginal}, or are displayed   "
-         "for the linear specification in table \ref{WTPgreg}."
+         "are all displayed in Figure \ref{WTP-marginal}, or are displayed   "
+         "for the linear specification in Table \ref{WTPgreg}."
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
 
+*-------------------------------------------------------------------------------
+*--- (5a-i) Interaction models
+*-------------------------------------------------------------------------------
+gen bwtGxParent = bwtGrams*parent
+lab var bwtGxParent "Birth Weight $\times$ Parent"
+local vars bwtGrams costNumerical parent bwtGxParent `ctrl'
+eststo: logit chosen `vars' if mainSample==1, cluster(ID)
+margins, dydx(bwtGrams costNumerical parent bwtGxParent _sob2 _sob3 _sob4 _gend2) post
+est store m1
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95a "[`ub';`lb']": m1
+est restore m1
+estadd scalar wtpb = -1000*(_b[bwtGxParent]/_b[costNumerical])
+nlcom ratio:_b[bwtGxParent]/_b[costNumerical], post
+local lb1 = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub1 = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95b "[`ub1';`lb1']": m1
+
+
+local vars bwtGrams costNumerical parent bwtGxParent  `ctrl'
+eststo: logit chosen `vars' if mainSample==1&nonparentPlans!=0, cluster(ID)
+margins, dydx(bwtGrams costNumerical parent bwtGxParent _sob2 _sob3 _sob4 _gend2) post
+est store m2
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95a "[`ub';`lb']": m2
+est restore m2
+estadd scalar wtpb = -1000*(_b[bwtGxParent]/_b[costNumerical])
+nlcom ratio:_b[bwtGxParent]/_b[costNumerical], post
+local lb1 = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub1 = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95b "[`ub1';`lb1']": m2
+
+local vars bwtGrams costNumerical parent bwtGxParent  `ctrl'
+eststo: logit chosen `vars' if mainSample==1&nonparentPlans!=1, cluster(ID)
+margins, dydx(bwtGrams costNumerical parent bwtGxParent _sob2 _sob3 _sob4 _gend2) post
+est store m4
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95a "[`ub';`lb']": m4
+est restore m4
+estadd scalar wtpb = -1000*(_b[bwtGxParent]/_b[costNumerical])
+nlcom ratio:_b[bwtGxParent]/_b[costNumerical], post
+local lb1 = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub1 = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95b "[`ub1';`lb1']": m4
+
+
+gen bwtGxPlans = bwtGrams*nonparentPlans
+lab var bwtGxPlans "Birth Weight $\times$ Planning Children"
+local vars bwtGrams costNumerical nonparentPlans bwtGxPlans  `ctrl'
+eststo: logit chosen `vars' if mainSample==1, cluster(ID)
+margins, dydx(bwtGrams costNumerical nonparentPlans bwtGxPlans _sob2 _sob3 _sob4 _gend2) post
+est store m3
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95a "[`ub';`lb']": m3
+est restore m3
+estadd scalar wtpb = -1000*(_b[bwtGxPlans]/_b[costNumerical])
+nlcom ratio:_b[bwtGxPlans]/_b[costNumerical], post
+local lb1 = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub1 = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95b "[`ub1';`lb1']": m3
+
+#delimit ;
+esttab m1 m2 m4 m3 using "$OUT/Regressions/conjointWTP-interactions.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(wtp conf95a wtpb conf95b N, fmt(%5.1f %5.1f %9.0g)
+    label("WTP for Birth Weight (1000 grams)" "95\% CI (Birth Weight)"
+          "WTP for Interation" "95\% CI (Interaction)" Observations))
+starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+mlabels("Parents v Non-Parents" "Parents v Planners"
+        "Parents v Non-Planners" "Planners v Non-Planners")
+booktabs label
+title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPpar}) 
+keep(bwtGrams costNumerical bwtGxParent bwtGxPlans
+     _gend2 _sob2 _sob3 _sob4)
+style(tex)
+postfoot("\bottomrule           "
+         "\multicolumn{5}{p{23.6cm}}{\begin{footnotesize} Refer to Table     "
+         "\ref{WTPreg} for full notes.  Each specification interacts birth   "
+         "weight with a dummy in order to estimate the differential          "
+         "importance of birth weight, as well as WTP. Values for WTP of the  "
+         "baseline group are displayed first in the footer, followed by the  "
+         "\emph{differential} WTP for the interaction group. Each model      "
+         "also includes the uninteracted dummy as a control.    Column 1     "
+         "consists of all observations, so the interaction is interpreted as "
+         "the difference between all parents and all non parents. Column 2   "
+         "consists of all parents and all non parents who plan to have       "
+         "children (non parents who do not plan to have children are removed "
+         "from the sample) so the interaction is interpreted as the          "
+         "difference between all parents and non parents who plan to have    "
+         "children.  Column 3 consists of all parents and non parents who    "
+         "\emph{don't} plan to have children, and column 4 consists of       "
+         "non-parents only, where the interaction is interpreted as the      "
+         "difference between those who plan to have children and those who   "
+         "do not."
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+
+
+*-------------------------------------------------------------------------------
+*--- (5b) By gender of respondent
+*-------------------------------------------------------------------------------
+gen mother = parent==1&RespSe=="Female"
+gen father = parent==1&RespSe=="Male"
+
+local m = 1
+foreach c in All==1 RespSe=="Female" RespSe=="Male" mother==1 father==1{
+    local vars bwtGrams costNumerical `ctrl' 
+    eststo: logit chosen `vars' if mainSample==1&`c', cluster(ID)
+    margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4 _gend2) post
+    est store m`m'
+
+    estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+    nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+    local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+    local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+    estadd local conf95a "[`ub';`lb']": m`m'
+    local ++m
+}
+#delimit ;
+esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGender.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
+                                            "95\% CI" Observations))
+starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+mgroups("All" "All Respondents" "Parents Only", pattern(1 1 0 1 0)
+        prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
+mlabels(" " "Female" "Male" "Mother" "Father") booktabs label
+title("Birth Characteristics and Willingness to Pay for Birth Weight by Gender"
+      \label{WTPgend}) 
+keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
+postfoot("\bottomrule           "
+         "\multicolumn{6}{p{20.2cm}}{\begin{footnotesize} Average marginal   "
+         "effects from a logit regression are displayed. All columns include "
+         "option order fixed effects and round fixed effects. Standard       "
+         "errors are clustered by respondent. Willingness to pay and its     "
+         "95\% confidence interval is estimated based on the ratio of costs  "
+         "to the probability of choosing a particular birth weight. The 95\% "
+         "confidence interval is calculated using the delta method for the   "
+         "ratio. Male and Female and Mother and Father refer to              "
+         "characteristics of experimental respondents."
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+
+
+
+*-------------------------------------------------------------------------------
+*--- (5c) By gender of profile
+*-------------------------------------------------------------------------------
 local ctrl `oFEs' _sob*
 local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
 local g1 mainSample==1&_gend2==1
@@ -604,7 +816,7 @@ starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
 mgroups("Girl Experiment" "Boy Experiment", pattern(1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 booktabs label
-title("Gender of Index Child and Willingness to Pay for Birth Weight"\label{WTPgend}) 
+title("Gender of Index Child and Willingness to Pay for Birth Weight"\label{WTPgendI}) 
 keep(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4) style(tex) 
 postfoot("\bottomrule           "
          "\multicolumn{5}{p{15.4cm}}{\begin{footnotesize} Estimates are      "
@@ -619,18 +831,19 @@ postfoot("\bottomrule           "
          "ratio. WTP estimates are only displayed in columns 1 and 3, as     "
          "columns 2 and 4 result in a single WTP for each categorical birth  "
          "weight measure.  Individual WTP values for boys and girls in the   "
-         "categorical weights are available in figure \ref{graphGend}."
+         "categorical weights are available in Figure \ref{graphGend}."
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
 
 *-------------------------------------------------------------------------------
-*--- (5b) Block bootstrap robustness test
+*--- (5d) Block bootstrap robustness test
 *-------------------------------------------------------------------------------
 local ctrl `oFEs' _gend* _sob*
 local nboot 1000
     
-foreach c in All==1 RespNumK!="0" RespNumK=="0" RespSe=="Female" RespSe=="Male" {
+foreach c in All==1 parent==1 parent==0 nonparentP==1 nonparentP==0   /*
+          */ mother==1 father==1 RespSe=="Female" RespSe=="Male" {
     preserve
     keep if `c'&mainSample==1
     #delimit ;
