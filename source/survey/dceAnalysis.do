@@ -21,7 +21,7 @@ global GEO "~/investigacion/2017/BWvalue/data/geography"
 
 
 log using "$LOG/dceAnalysis.txt", text replace
-
+/*
 *-------------------------------------------------------------------------------
 *--- (1) Open data
 *-------------------------------------------------------------------------------
@@ -186,7 +186,7 @@ legend(symy(*1.2) symx(*1.2) size(*1.4) rowgap(1));
 graph export "$OUT/Summary/surveyCoverage.eps", as(eps) replace;
 #delimit cr
 restore
-
+*/
 *-------------------------------------------------------------------------------
 *--- (2) Conjoint Analysis 
 *-------------------------------------------------------------------------------
@@ -285,6 +285,40 @@ lab var _bwt9  "8lbs, 3oz"
 lab var _bwt10 "8lbs, 8oz"
 lab var _bwt11 "8lbs, 13oz"
 sort _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
+
+#delimit ;
+local snames `" "Alabama" "Alaska" "Arizona" "Arkansas" "California"
+"Colorado" "Connecticut" "Delaware" "District of Columbia" "Florida" "Georgia"
+"Idaho" "Illinois" "Indiana" "Iowa" "Kansas" "Kentucky" "Louisiana" "Maine"
+"Maryland" "Massachusetts" "Michigan" "Minnesota" "Mississippi" "Missouri"
+"Montana" "Nebraska" "Nevada" "New Hampshire" "New Jersey" "New Mexico"
+"New York" "North Carolina" "North Dakota" "Ohio" "Oklahoma" "Oregon"
+"Pennsylvania" "Rhode Island" "South Carolina" "South Dakota" "Tennessee"
+"Texas" "Utah" "Virginia" "Washington" "West Virginia" "Wisconsin" "Hawaii"
+"Vermont" "Wyoming" "';
+local sprop 151 23 212 93 1218 170 112 29 21 631 318 51 400 206 97 91 138 145
+41 187 211 309 171 93 189 32 59 90 41 279 65 616 312 24 361 122 125 398 33 152
+27 205 855 93 261 223 57 180 45 19 18;
+#delimit cr
+
+bys RespState: gen statePop = _N if mainSample==1
+count if mainSample==1
+gen surveyProportion = statePop/r(N)
+gen censusProportion = .
+tokenize `sprop'
+local total = 0
+foreach state of local snames {
+    dis "State: `state', pop: `1'"
+    qui replace censusProportion = `1' if RespState=="`state'"
+    local total = `total'+`1'
+    macro shift
+}
+dis `total'
+replace censusProportion = censusProportion/10000
+gen weight = surveyProportion/censusProportion
+replace weight=1/weight
+
+/*
 *-------------------------------------------------------------------------------
 *--- (3) Estimate
 *-------------------------------------------------------------------------------
@@ -523,6 +557,57 @@ foreach c in nonparentPlans==1 nonparentPlans==0 {
     dis "WTP is `wtp', [`lb'; `ub']" 
 }
 
+
+**WEIGHTS
+local wopts [pw=weight] if mainSample==1, cluster(ID)
+eststo: logit chosen bwtGrams costNumerical `ctrl' `wopts' 
+margins, dydx(bwtGrams costNumerical _sob2 _sob3 _sob4 _gend2) post
+est store m1
+
+estadd scalar wtp = -1000*(_b[bwtGrams]/_b[costNumerical])
+nlcom ratio:_b[bwtGrams]/_b[costNumerical], post
+local lb = string(-1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+local ub = string(-1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+estadd local conf95 "[`ub';`lb']": m1
+
+eststo: logit chosen `bwts' costNumerical `ctrl' `wopts' 
+margins, dydx(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) post
+est store m2
+*estadd scalar wtpSp = -1000*_b[spring]/_b[costNumerical]
+*nlcom ratio:_b[spring]/_b[costNumerical], post
+*local lb = string(-1000*(_b[ratio]-`tvL'*_se[ratio]), "%5.1f")
+*local ub = string(-1000*(_b[ratio]+`tvL'*_se[ratio]), "%5.1f")
+*estadd local conf95sp "[`ub';`lb']": m2
+*est restore m2
+
+
+lab var _sob4 "Fall"
+lab var _sob2 "Spring"
+lab var _sob3 "Summer"
+lab var costNumerical "Cost (in 1000s of dollars)"
+lab var bwtGrams      "Birth Weight (in 1000s of grams)"
+
+#delimit ;
+esttab m1 m2 using "$OUT/Regressions/conjointWTP-weighted.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)" "95\% CI"
+                                            Observations))
+starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+mlabels("Continuous" "Categorical") booktabs label
+title("Birth Characteristics and WTP for Birth Weight Re-weighting by State Population"
+      \label{WTPregweight}) 
+keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4 `bwts') style(tex) 
+postfoot("\bottomrule           "
+         "\multicolumn{3}{p{11.2cm}}{\begin{footnotesize} Refer to table    "
+         "\ref{WTPreg} for full notes.  This table replicates these results "
+         "assigning probability weights to respondents based on their state "
+         "of residence so that the likelihood a particular respondent is    "
+         "included in the survey is the same as their state's portion of    "
+         "the national population."
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+exit
 
 *-------------------------------------------------------------------------------
 *--- (5a) By Parent/non-parent
@@ -869,7 +954,7 @@ logit chosen bwtGrams costNumerical `oFEs' _sob*, cluster(bID);
 #delimit cr
 restore
 
-
+*/
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
 *-------------------------------------------------------------------------------
@@ -903,6 +988,9 @@ graph export "$OUT/Figures/WTP_relative.eps", replace
 
 **GIRLS AND BOYS
 local ctrl `oFEs' _sob*
+local g1 mainSample==1&_gend2==1
+local g2 mainSample==1&_gend2==0
+                      
 eststo: logit chosen `bwts' costNumerical `ctrl' if `g1', cluster(ID)
 margins, dydx(costNumerical `bwts' _sob2 _sob3 _sob4) post
 
@@ -958,10 +1046,13 @@ foreach num of numlist 2(1)11 {
     restore
     
     replace m_bwtWTP = -1000*(_b[_bwt`num']/_b[costNumerical]) in `num'
+    dis "Marginal WTP for bwt `num':" -1000*(_b[_bwt`num']/_b[costNumerical])/136.4
     nlcom ratio:_b[_bwt`num']/_b[costNumerical], post
     replace m_bwtUB = -1000*(_b[ratio]+1.96*_se[ratio]) in `num'
     replace m_bwtLB = -1000*(_b[ratio]-1.96*_se[ratio]) in `num'
+
 }
+
 #delimit ;
 twoway line m_bwtWTP nums in 1/11, lcolor(black)   ||
     scatter m_bwtWTP nums in 1/11, msymbol(O)  ||
@@ -973,7 +1064,25 @@ legend(order(2 "Marginal Willingness to Pay" 3 "95% CI"));
 #delimit cr
 graph export "$OUT/Figures/WTP_marginal.eps", replace
 
-
+cap gen All=1
+foreach c in All==1 parent==1 parent==0 nonparentP==1 nonparentP==0 {
+    dis "group is `c'"
+    foreach num of numlist 2(1)11 {
+        local n1 = `num'-1
+        preserve
+        qui: drop _bwt`n1'
+        qui: logit chosen _bwt* costNumerical `ctrl' if mainSample==1&`c', cluster(ID)
+        qui: margins, dydx(costNumerical _bwt`num')
+        local pointEst= -1000*(_b[_bwt`num']/_b[costNumerical])/136.4
+        qui: nlcom ratio:_b[_bwt`num']/_b[costNumerical], post
+        local m_bwtUB = -1000*(_b[ratio]+1.96*_se[ratio])/136.4 in `num'
+        local m_bwtLB = -1000*(_b[ratio]-1.96*_se[ratio])/136.4 in `num'
+        restore
+    
+        dis "Marginal WTP for bwt `num': `pointEst' [`m_bwtLB';`m_bwtUB']" 
+    }
+}
+exit
 *-------------------------------------------------------------------------------
 *--- (7) Assumptions
 *-------------------------------------------------------------------------------
