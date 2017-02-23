@@ -473,7 +473,7 @@ graph combine "$OUT/Figures/cg_parent_cont" "$OUT/Figures/cg_nonparent_cont"
 scheme(s1mono) rows(1) xcommon xsize(11);
 graph export "$OUT/Figures/parentalSubsets.eps", replace;
 #delimit cr
-
+*/
 *-------------------------------------------------------------------------------
 *--- (5) Regressions and willingness to pay
 *-------------------------------------------------------------------------------
@@ -489,6 +489,107 @@ replace bwtGrams = 3714 if birthweight=="8 pounds 3 ounces"
 replace bwtGrams = 3856 if birthweight=="8 pounds 8 ounces"
 replace bwtGrams = 4000 if birthweight=="8 pounds 13 ounces"
 replace bwtGrams = bwtGrams/1000
+
+
+*-------------------------------------------------------------------------------
+*--- (X) Adding heterogeneity using mixed logit
+*-------------------------------------------------------------------------------
+cap which mixlogit
+if _rc!=0 ssc install mixlogit
+
+gen price = costNumerical
+gen group = 1000*ID+round
+local c1 if mainSample==1
+local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
+#delimit ;
+local conds mainSample==1 mainSample==1&parent==1 mainSample==1&parent==0 
+            mainSample==1&nonparentPlans==1 mainSample==1&nonparentPlans==0;
+#delimit cr
+local n=1
+foreach c1 of local conds {
+    mixlogit chosen price if `c1', id(ID) group(group) rand(bwtGrams _sob* _gend*)
+    estimates store g`n'
+    *degree of heterogeneity
+    estadd scalar pcb = 100*normal(_b[Mean:bwtGrams]/abs(_b[SD:bwtGrams]))
+    *estadd scalar pcc = 100-100*normal(_b[Mean:price]/abs(_b[SD:price]))
+    *wtp
+    estadd scalar wtp = 1000*(_b[bwtGrams]/_b[price])
+    nlcom ratio:_b[bwtGrams]/_b[price], post
+    local lb = string(1000*(_b[ratio]-1.96*_se[ratio]), "%5.1f")
+    local ub = string(1000*(_b[ratio]+1.96*_se[ratio]), "%5.1f")
+    estadd local conf95 "[`ub';`lb']": g`n'
+
+    gen WTPpm = 0 in 1/11
+    gen WTPlm = 0 in 1/11
+    gen WTPum = 0 in 1/11
+    gen pcbm  = . in 1/11
+    mixlogit chosen price if `c1', id(ID) group(group) rand(`bwts' _sob* _gend*) 
+    estimates store h`n'
+    *degree of heterogeneity
+    foreach num of numlist 2(1)11 {
+        replace pcbm = 100*normal(_b[Mean:_bwt`num']/abs(_b[SD:_bwt`num'])) in `num'
+    }
+    *local pcc = 100-100*normal(_b[Mean:price]/_b[SD:price])
+    *wtp
+    foreach num of numlist 2(1)11 {
+        replace WTPpm = -1000*(_b[_bwt`num']/_b[price]) in `num'
+        nlcom ratio:_b[_bwt`num']/_b[price], post
+        replace WTPlm = -1000*(_b[ratio]-1.96*_se[ratio]) in `num'
+        replace WTPum = -1000*(_b[ratio]+1.96*_se[ratio]) in `num'        
+        estimates restore h`n'
+    }
+    gen nums = _n
+    lab var pcbm "Percent Preferring Element"
+    #delimit ;
+    twoway line WTPpm nums in 1/11, lcolor(black) yaxis(1) ||
+           scatter WTPpm nums in 1/11, msymbol(O) yaxis(1) ||
+    rcap WTPlm WTPum nums in 1/11, scheme(s1mono) yaxis(1) ||
+    scatter pcbm nums in 1/11, yaxis(2)
+    ytitle("Willingness to Pay (Dollars)") xtitle("Birth Weight (grams)") 
+    xlabel(1 "2500" 2 "2637" 3 "2807" 4 "2948" 5 "3090" 6 "3260" 7 "3402"
+           8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
+    legend(order(2 "Willingness to Pay" 3 "95% CI (WTP)" 4 "Percent Preferring"));
+    #delimit cr
+    graph export "$OUT/Figures/WTP_mixed_`n'.eps", replace
+    
+    local ++n
+    drop WTPpm WTPlm WTPum pcbm nums
+    
+}
+lab var _sob4    "Fall"
+lab var _sob2    "Spring"
+lab var _sob3    "Summer"
+lab var price    "Cost (in 1000s of dollars)"
+lab var bwtGrams "Birth Weight (in 1000s of grams)"
+
+#delimit ;
+esttab g1 g2 g3 g4 g5 using "$OUT/Regressions/WTP-mixedlogit.tex", replace
+cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
+(wtp conf95 pcb N, fmt(%5.1f %5.1f %5.1f %9.0g)
+    label("WTP for Birth Weight (1000 grams)" "95\% CI"
+          "\% Positively Impacted by Birth Weight" Observations))
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none) 
+mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0) 
+        prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
+mlabels(" " "Yes" "No" "Planning" "Not Planning") booktabs label style(tex) 
+title("Allowing for Preference Heterogeneity with Mixed Logit"\label{WTPmix}) 
+postfoot("\bottomrule           "
+         "\multicolumn{6}{p{22.1cm}}{\begin{footnotesize} All specifications "
+         "are estimated using a Mixed Logit model. Panel A displays mean     "
+         "coefficients from the mixed logit, and panel B displays the        "
+         "estimated standard deviation of each coefficient.  All coefficients"
+         " with the exception of Cost are allowed to vary randomly throughout"
+         " the sample.  The WTP is calculated as the ratio of the coefficient"
+         " on birth weight to that on costs, and confidence intervals are    "
+         "calculated by the delta method. The \% of respondents who value    "
+         "birth weight positively based on individual coefficients is        "
+         "displayed at the foot of the table.  Standard errors are clustered "
+         "by respondent."
+         "\end{footnotesize}}\end{tabular}\end{table}");
+#delimit cr
+estimates clear
+
+exit
 
 local ctrl `oFEs' _gend* _sob*
 local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
@@ -524,7 +625,7 @@ esttab m1 m2 using "$OUT/Regressions/conjointWTP.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)" "95\% CI"
                                             Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mlabels("Continuous" "Categorical") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4 `bwts') style(tex) 
@@ -592,7 +693,7 @@ esttab m1 m2 using "$OUT/Regressions/conjointWTP-weighted.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)" "95\% CI"
                                             Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mlabels("Continuous" "Categorical") booktabs label
 title("Birth Characteristics and WTP for Birth Weight Re-weighting by State Population"
       \label{WTPregweight}) 
@@ -632,7 +733,7 @@ esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGroups.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
                                             "95\% CI" Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Yes" "No" "Planning" "Not Planning") booktabs label
@@ -668,7 +769,7 @@ foreach c in All==1 parent==1 parent==0 nonparentP==1 nonparentP==0 {
 esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGroups-wts.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (N, fmt(%9.0g) label(Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Yes" "No" "Planning" "Not-Planning") booktabs label
@@ -769,7 +870,7 @@ cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95a wtpb conf95b N, fmt(%5.1f %5.1f %9.0g)
     label("WTP for Birth Weight (1000 grams)" "95\% CI (Birth Weight)"
           "WTP for Interation" "95\% CI (Interaction)" Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mlabels("Parents v Non-Parents" "Parents v Planners"
         "Parents v Non-Planners" "Planners v Non-Planners")
 booktabs label
@@ -826,7 +927,7 @@ esttab m1 m2 m3 m4 m5 using "$OUT/Regressions/conjointGender.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95a N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
                                             "95\% CI" Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mgroups("All" "All Respondents" "Parents Only", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Female" "Male" "Mother" "Father") booktabs label
@@ -897,7 +998,7 @@ esttab m1 m2 m3 m4 using "$OUT/Regressions/conjoint-gendInd.tex", replace
 cells(b(star fmt(%-9.3f)) se(fmt(%-9.3f) par([ ]) )) stats
 (wtp conf95 N, fmt(%5.1f %5.1f %9.0g) label("WTP for Birth Weight (1000 grams)"
                                             "95\% CI" Observations))
-starlevels(* 0.05 ** 0.01 *** 0.001) collabels(,none)
+starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mgroups("Girl Experiment" "Boy Experiment", pattern(1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 booktabs label
