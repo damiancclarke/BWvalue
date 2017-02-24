@@ -493,21 +493,36 @@ replace bwtGrams = bwtGrams/1000
 
 *-------------------------------------------------------------------------------
 *--- (X) Adding heterogeneity using mixed logit
+*--- argument against using log: we see bwt is negative at some points of dist
 *-------------------------------------------------------------------------------
 cap which mixlogit
 if _rc!=0 ssc install mixlogit
 
 gen price = costNumerical
 gen group = 1000*ID+round
-local c1 if mainSample==1
 local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
+
 #delimit ;
 local conds mainSample==1 mainSample==1&parent==1 mainSample==1&parent==0 
             mainSample==1&nonparentPlans==1 mainSample==1&nonparentPlans==0;
+local titles all parents nonparents planners nonplanners;
+tokenize `titles';
 #delimit cr
 local n=1
+/*
 foreach c1 of local conds {
     mixlogit chosen price if `c1', id(ID) group(group) rand(bwtGrams _sob* _gend*)
+    local price = _b[price]
+    mixlbeta bwtGrams, saving("$OUT/Regressions/mixparameters-``n''") replace
+    preserve
+    use "$OUT/Regressions/mixparameters-``n''", clear
+    gen wtp = -bwtGrams/`price'
+    #delimit ;
+    hist wtp, scheme(s1mono) xtitle("WTP per Gram of Birth Weight ($)")
+    fcolor(gs10) lcolor(black) fintensity(25);
+    #delimit cr
+    graph export "$OUT/Figures/WTPdist-``n''.eps", replace
+    restore
     estimates store g`n'
     *degree of heterogeneity
     estadd scalar pcb = 100*normal(_b[Mean:bwtGrams]/abs(_b[SD:bwtGrams]))
@@ -550,7 +565,7 @@ foreach c1 of local conds {
            8 "3544" 9 "3714" 10 "3856" 11 "4000") yline(0, lcolor(red) lpattern(dash))
     legend(order(2 "Willingness to Pay" 3 "95% CI (WTP)" 4 "Percent Preferring"));
     #delimit cr
-    graph export "$OUT/Figures/WTP_mixed_`n'.eps", replace
+    graph export "$OUT/Figures/WTP_mixed_``n''.eps", replace
     
     local ++n
     drop WTPpm WTPlm WTPum pcbm nums
@@ -588,6 +603,21 @@ postfoot("\bottomrule           "
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
+
+*/
+*test for prediction power
+foreach c1 of local conds {
+    local cc if `c1'&round!=4
+    mixlogit chosen price `cc', id(ID) group(group) rand(_bwt* _sob* _gend*)
+    mixlpred simchoice if `c1'
+    gen simchosen = simchoice>0.5
+    tab simchosen chosen if round==4&`c1'
+    count if simchosen==1&chosen==1&round==4&`c1'
+    local Num=r(N)
+    count if simchosen==1&chosen==0&round==4&`c1'
+    local D1 =r(N)
+    dis "proportion chosen correctly is: " `Num'/(`Num'+`D1')
+}
 
 exit
 
