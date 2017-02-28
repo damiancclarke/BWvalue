@@ -318,7 +318,7 @@ replace censusProportion = censusProportion/10000
 gen weight = surveyProportion/censusProportion
 replace weight=1/weight
 
-/*
+
 *-------------------------------------------------------------------------------
 *--- (3) Estimate
 *-------------------------------------------------------------------------------
@@ -336,18 +336,17 @@ tokenize `names';
 lab def names -1 "Birth Weight" -2 "5lbs, 8oz" -3 "5lbs, 13oz" -4 "6lbs, 3oz"
               -5 "6lbs, 8oz" -6 "6lbs, 13oz" -7 "7lbs, 3oz" -8 "7lbs, 8oz"
               -9 "7lbs, 13oz" -10 "8lbs, 3oz" -11 "8lbs, 8oz" -12 "8lbs, 13oz"
-              -13 " " -14 "Season of Birth" -15 "Winter" -16 "Spring"
-              -17 "Summer" -18 "Fall" -19 " " -20 "Cost" -21 "250" -22 "750" 
-              -23 "1000" -24 "2000" -25 "3000" -26 "4000" -27 "5000" -28 "6000"
-              -29 "7500" -30 "10000" -31 " " -32 "Gender" -33 "Boy" -34 "Girl"
-              -35 " ";
+              -13 " " -14 "Cost" -15 "250" -16 "750"  -17 "1000" -18 "2000"
+              -19 "3000" -20 "4000" -21 "5000" -22 "6000" -23 "7500" -24 "10000"
+              -25 " " -26 "Gender" -27 "Boy" -28 "Girl" -29 " " 
+              -30 "Season of Birth" -31 "Winter" -32 "Spring" -33 "Summer"  
+              -34 "Fall" -35 " ";
 lab def namesT -1 "Birth Weight" -2 "5lbs, 8oz" -3 "5lbs, 13oz"
                -4 "6lbs, 3oz" -5 "6lbs, 8oz" -6 "6lbs, 13oz" -7 "7lbs, 3oz"
-               -8 "7lbs, 8oz" -9 "7lbs, 13oz" -10 "8lbs, 3oz" 
-               -11 "8lbs, 8oz" -12 "8lbs, 13oz"  -13 " " 
-               -14 "Season of Birth" -15 "Winter" -16 "Spring" -17 "Summer"
-               -18 "Fall" -19 " " -20 "Cost" -21 "1000s of USD" -22 " " 
-               -23 "Gender" -24 "Boy" -25 "Girl" -26 " ";
+               -8 "7lbs, 8oz" -9 "7lbs, 13oz" -10 "8lbs, 3oz" -11 "8lbs, 8oz"
+               -12 "8lbs, 13oz"  -13 " "  -14 "Cost" -15 "1000s of USD" -16 " " 
+               -17 "Gender" -18 "Boy" -19 "Girl" -20 " " -21 "Season of Birth" 
+               -22 "Winter" -23 "Spring" -24 "Summer" -25 "Fall" -26 " ";
 #delimit cr
 
 local tvL = 1.96
@@ -357,8 +356,8 @@ foreach c of local conds {
     local ++jj
     if `jj'==3 local title title("Parents", box bexpand size(medium))
     if `jj'==4 local title title("Non-Parents", box bexpand size(medium))
-    if `jj'==5 local title title("Non-Parents (Planning Kids)", box bexpand size(medium))
-    if `jj'==6 local title title("Non-Parents (Not Planning)", box bexpand size(medium))
+    if `jj'==5 local title title("Non-Parents Planning Kids", box bexpand size(medium))
+    if `jj'==6 local title title("Non-Parents Not Planning", box bexpand size(medium))
     if `jj'>1 local c `c'&mainSample==1
     reg chosen `oFEs' _sob* _cost* _gend* _bwt* if `c', cluster(ID)
     local Nobs = e(N)
@@ -369,18 +368,18 @@ foreach c of local conds {
     gen Y   = .
     local i = 1
     local vars BIRTH-WEIGHT _bwt1 _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8  /*
-    */ _bwt9 _bwt10 _bwt11 s SEASON-OF_BIRTH _sob1 _sob2 _sob3 _sob4 s COST  /*
-    */_cost1 _cost2 _cost3 _cost4 _cost5 _cost6 _cost7 _cost8 _cost9 _cost10 /*
-    */ s GENDER _gend1 _gend2 s 
+    */ _bwt9 _bwt10 _bwt11 s COST _cost1 _cost2 _cost3 _cost4 _cost5 _cost6  /*
+    */ _cost7 _cost8 _cost9 _cost10 s GENDER _gend1 _gend2 s SEASON-OF_BIRTH /*
+    */ _sob1 _sob2 _sob3 _sob4 s  
 
     foreach var of local vars {
         qui replace Y = `i' in `i'
-        if `i'==1|`i'==14|`i'==20|`i'==32 {
+        if `i'==1|`i'==14|`i'==26|`i'==30 {
             dis "`var'"
         }
-        else if `i'==13|`i'==19|`i'==31|`i'==35 {
+        else if `i'==13|`i'==25|`i'==29|`i'==35 {
         }
-        else if `i'==2|`i'==15|`i'==25|`i'==33 {
+        else if `i'==2|`i'==19|`i'==27|`i'==31 {
             qui replace Est = 0 in `i'
             qui replace UB  = 0 in `i'
             qui replace LB  = 0 in `i'
@@ -402,8 +401,8 @@ foreach c of local conds {
     #delimit ;
     twoway rcap  LB UB Y in 1/35, horizontal scheme(s1mono) lcolor(black) ||
     scatter Y Est in 1/35, mcolor(black) msymbol(oh) mlwidth(thin)
-    xline(0, lpattern(dash) lcolor(gs7)) ylabel(-1 -14 -20 -32, valuelabel angle(0))
-    ymlabel(-2(-1)-12 -15(-1)-18 -21(-1)-30 -33(-1)-34, valuelabel angle(0))
+    xline(0, lpattern(dash) lcolor(gs7)) ylabel(-1 -14 -26 -30, valuelabel angle(0))
+    ymlabel(-2(-1)-12 -15(-1)-24 -27(-1)-28 -31(-1)-34, valuelabel angle(0))
     ytitle("") xtitle("Effect Size (Probability)") legend(off) ysize(8)
     note(Total respondents = `=`Nobs'/14'.  Total profiles = `Nobs'.)
     saving("$OUT/Figures/cg_`1'", replace) `title';
@@ -423,17 +422,17 @@ foreach c of local conds {
     gen Y   = .
     local i = 1
     local vars BIRTH-WEIGHT _bwt1 _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 /*
-    */_bwt9 _bwt10 _bwt11 s SEASON-OF_BIRTH _sob1 _sob2 _sob3 _sob4 s COST  /*
-    */ costNumerical s GENDER _gend1 _gend2 s 
+    */_bwt9 _bwt10 _bwt11 s COST costNumerical s GENDER _gend1 _gend2 s     /*
+    */ SEASON-OF_BIRTH _sob1 _sob2 _sob3 _sob4 s
 
     foreach var of local vars {
         qui replace Y = `i' in `i'
-        if `i'==1|`i'==14|`i'==20|`i'==23 {
+        if `i'==1|`i'==14|`i'==17|`i'==21 {
             dis "`var'"
         }
-        else if `i'==13|`i'==19|`i'==22|`i'==26 {
+        else if `i'==13|`i'==16|`i'==20|`i'==26 {
         }
-        else if `i'==2|`i'==15|`i'==24 {
+        else if `i'==2|`i'==18|`i'==22 {
             qui replace Est = 0 in `i'
             qui replace UB  = 0 in `i'
             qui replace LB  = 0 in `i'
@@ -453,8 +452,8 @@ foreach c of local conds {
     twoway rcap  LB UB Y in 1/26, horizontal scheme(s1mono) lcolor(black) ||
     scatter Y Est in 1/26, mcolor(black) msymbol(oh) mlwidth(thin)
     xline(0, lpattern(dash) lcolor(gs7))
-    ylabel(-1 -14 -20 -23, valuelabel angle(0)) xlabel(-0.1(0.1)0.3)
-    ymlabel(-2(-1)-12 -15(-1)-18 -21 -24 -25, valuelabel angle(0))
+    ylabel(-1 -14 -17 -21, valuelabel angle(0)) xlabel(-0.1(0.1)0.3)
+    ymlabel(-2(-1)-12 -15 -18 -19 -22(-1)-25, valuelabel angle(0))
     ytitle("") xtitle("Effect Size (Probability)") legend(off) ysize(7)
     note("Total respondents = `=`Nobs'/14'.  Total profiles = `Nobs'.")
     saving("$OUT/Figures/cg_`1'_cont", replace) `title';
@@ -490,7 +489,17 @@ replace bwtGrams = 3856 if birthweight=="8 pounds 8 ounces"
 replace bwtGrams = 4000 if birthweight=="8 pounds 13 ounces"
 replace bwtGrams = bwtGrams/1000
 
+gen wtp = bwtGrams/costNumerical
+gen wtp2 = wtp^2
 
+logit chosen wtp if mainSample==1, cluster(ID)
+logit chosen wtp wtp2 if mainSample==1, cluster(ID)
+logit chosen wtp `oFEs' _sob* _gend* if mainSample==1, cluster(ID)
+logit chosen wtp wtp2 `oFEs' _sob* _gend* if mainSample==1, cluster(ID)
+reg chosen wtp if mainSample==1, cluster(ID)
+estat ovtest
+
+/*
 *-------------------------------------------------------------------------------
 *--- (X) Adding heterogeneity using mixed logit
 *--- argument against using log: we see bwt is negative at some points of dist
@@ -509,11 +518,23 @@ local titles all parents nonparents planners nonplanners;
 tokenize `titles';
 #delimit cr
 local n=1
-/*
+
+
+
 foreach c1 of local conds {
+    #delimit ;
+    mixlogit chosen price if `c1', id(ID) group(group) rand(bwtGrams) 
+          ln(1) technique(dfp) difficult;
+    nlcom (mean_price: exp([Mean]_b[bwtGrams]+0.5*[SD]_b[bwtGrams]^2))
+          (med_price:  exp([Mean]_b[bwtGrams]))
+          (sd_price:   exp([Mean]_b[bwtGrams]+0.5*[SD]_b[bwtGrams]^2)
+                       *sqrt(exp([SD]_b[bwtGrams]^2)-1));
+    mixlbeta bwtGrams if `c1', saving("$OUT/Regressions/mixparameters-``n''-L") replace;
+    #delimit cr
+    
     mixlogit chosen price if `c1', id(ID) group(group) rand(bwtGrams _sob* _gend*)
     local price = _b[price]
-    mixlbeta bwtGrams, saving("$OUT/Regressions/mixparameters-``n''") replace
+    mixlbeta bwtGrams  if `c1', saving("$OUT/Regressions/mixparameters-``n''") replace
     preserve
     use "$OUT/Regressions/mixparameters-``n''", clear
     gen wtp = -bwtGrams/`price'
@@ -603,24 +624,24 @@ postfoot("\bottomrule           "
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
+exit
 
-*/
 *test for prediction power
 foreach c1 of local conds {
-    local cc if `c1'&round!=4
+    local cc if `c1'&round!=5
     mixlogit chosen price `cc', id(ID) group(group) rand(_bwt* _sob* _gend*)
     mixlpred simchoice if `c1'
     gen simchosen = simchoice>0.5
-    tab simchosen chosen if round==4&`c1'
-    count if simchosen==1&chosen==1&round==4&`c1'
+    tab simchosen chosen if round==5&`c1'
+    count if simchosen==1&chosen==1&round==5&`c1'
     local Num=r(N)
-    count if simchosen==1&chosen==0&round==4&`c1'
+    count if simchosen==1&chosen==0&round==5&`c1'
     local D1 =r(N)
     dis "proportion chosen correctly is: " `Num'/(`Num'+`D1')
+    drop simchoice simchosen
 }
 
-exit
-
+*/
 local ctrl `oFEs' _gend* _sob*
 local bwts _bwt2 _bwt3 _bwt4 _bwt5 _bwt6 _bwt7 _bwt8 _bwt9 _bwt10 _bwt11
 eststo: logit chosen bwtGrams costNumerical `ctrl' if mainSample==1, cluster(ID)
@@ -659,6 +680,7 @@ starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mlabels("Continuous" "Categorical") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPreg}) 
 keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4 `bwts') style(tex) 
+order(bwtGrams costNumerical  `bwts' _gend2 _sob2 _sob3 _sob4)
 postfoot("\bottomrule           "
          "\multicolumn{3}{p{11.2cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
@@ -727,9 +749,10 @@ starlevels(* 0.10 ** 0.05 *** 0.01) collabels(,none)
 mlabels("Continuous" "Categorical") booktabs label
 title("Birth Characteristics and WTP for Birth Weight Re-weighting by State Population"
       \label{WTPregweight}) 
-keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4 `bwts') style(tex) 
+keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4 `bwts') style(tex)
+order(bwtGrams costNumerical  `bwts' _gend2 _sob2 _sob3 _sob4)
 postfoot("\bottomrule           "
-         "\multicolumn{3}{p{11.2cm}}{\begin{footnotesize} Refer to table    "
+         "\multicolumn{3}{p{11.2cm}}{\begin{footnotesize} Refer to Table    "
          "\ref{WTPreg} for full notes.  This table replicates these results "
          "assigning probability weights to respondents based on their state "
          "of residence so that the likelihood a particular respondent is    "
@@ -738,7 +761,7 @@ postfoot("\bottomrule           "
          "\end{footnotesize}}\end{tabular}\end{table}");
 #delimit cr
 estimates clear
-exit
+
 
 *-------------------------------------------------------------------------------
 *--- (5a) By Parent/non-parent
@@ -768,7 +791,8 @@ mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Yes" "No" "Planning" "Not Planning") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPgreg}) 
-keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
+keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex)
+order(bwtGrams costNumerical  _gend2 _sob2 _sob3 _sob4)
 postfoot("\bottomrule           "
          "\multicolumn{6}{p{19.5cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
@@ -804,7 +828,8 @@ mgroups("All" "Parent" "Non-Parents", pattern(1 1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 mlabels(" " "Yes" "No" "Planning" "Not-Planning") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPgregc}) 
-keep(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) style(tex) 
+keep(costNumerical `bwts' _gend2 _sob2 _sob3 _sob4) style(tex)
+order(bwtGrams costNumerical  `bwts' _gend2 _sob2 _sob3 _sob4)
 postfoot("\bottomrule           "
          "\multicolumn{6}{p{15.0cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
@@ -905,8 +930,8 @@ mlabels("Parents v Non-Parents" "Parents v Planners"
         "Parents v Non-Planners" "Planners v Non-Planners")
 booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight"\label{WTPpar}) 
-keep(bwtGrams costNumerical bwtGxParent bwtGxPlans
-     _gend2 _sob2 _sob3 _sob4)
+keep(bwtGrams costNumerical bwtGxParent bwtGxPlans _gend2 _sob2 _sob3 _sob4)
+order(bwtGrams costNumerical bwtGxParent bwtGxPlans _gend2 _sob2 _sob3 _sob4)
 style(tex)
 postfoot("\bottomrule           "
          "\multicolumn{5}{p{23.6cm}}{\begin{footnotesize} Refer to Table     "
@@ -963,7 +988,8 @@ mgroups("All" "All Respondents" "Parents Only", pattern(1 1 0 1 0)
 mlabels(" " "Female" "Male" "Mother" "Father") booktabs label
 title("Birth Characteristics and Willingness to Pay for Birth Weight by Gender"
       \label{WTPgend}) 
-keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex) 
+keep(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4) style(tex)
+order(bwtGrams costNumerical _gend2 _sob2 _sob3 _sob4)
 postfoot("\bottomrule           "
          "\multicolumn{6}{p{20.2cm}}{\begin{footnotesize} Average marginal   "
          "effects from a logit regression are displayed. All columns include "
@@ -1033,7 +1059,8 @@ mgroups("Girl Experiment" "Boy Experiment", pattern(1 0 1 0)
         prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span}))
 booktabs label
 title("Gender of Index Child and Willingness to Pay for Birth Weight"\label{WTPgendI}) 
-keep(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4) style(tex) 
+keep(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4) style(tex)
+order(costNumerical bwtGrams `bwts' _sob2 _sob3 _sob4)
 postfoot("\bottomrule           "
          "\multicolumn{5}{p{15.4cm}}{\begin{footnotesize} Estimates are      "
          "separated by the gender of the child shown in each profile (girl   "
@@ -1085,7 +1112,7 @@ logit chosen bwtGrams costNumerical `oFEs' _sob*, cluster(bID);
 #delimit cr
 restore
 
-*/
+
 *-------------------------------------------------------------------------------
 *--- (6) Full WTP and marginal WTP
 *-------------------------------------------------------------------------------
